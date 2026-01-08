@@ -74,26 +74,28 @@ export const NewRequestClient = () => {
           const reference = id;
           const subject = `${requests.email.subjectPrefix} ${reference}${requests.email.subjectSeparator}${type}${requests.email.subjectSeparator}${city}`;
           const body = buildEmailBody(reference, id);
-          const next = [
-            ...getRequests(),
-            {
-              id,
-              createdAt: new Date().toISOString(),
-              reference,
-              type,
-              city,
-              status: "reçue" as const,
-              description,
-              attachments: files.map((file) => ({
-                name: file.name,
-                size: file.size,
-                type: file.type,
-              })),
-              emailSubject: subject,
-              emailBody: body,
-              notes: [],
-            },
-          ];
+          import type { RequestItem } from "@/lib/pro/types"; // adapte le chemin exact
+
+...
+
+          const newItem: RequestItem = {
+          id,
+          createdAt: new Date().toISOString(),
+          reference,
+          type,
+          city,
+          status: "reçue",
+          description,
+          attachments,
+          emailSubject,
+          emailBody,
+          notes: [],
+        };
+
+        const next: RequestItem[] = [...requests, newItem];
+        setRequests(next);
+        router.push(`/pro/demandes/${id}`);
+
           setRequests(next);
           router.push(`/pro/demandes/${id}`);
         }}
