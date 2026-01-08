@@ -37,12 +37,12 @@ export default function AperturaOutro() {
         {
           opacity: 0,
           filter: "blur(10px)",
-          clipPath: "inset(0 100% 0 0 round 24px)",
+          clipPath: "inset(0 100% 0 0)",
         },
         {
           opacity: 1,
           filter: "blur(0px)",
-          clipPath: "inset(0 0% 0 0 round 24px)",
+          clipPath: "inset(0 0% 0 0)",
           duration: 1,
           ease: "none",
         }
@@ -56,16 +56,6 @@ export default function AperturaOutro() {
           0.3
         );
       }
-
-      // Petit accent cuivre ultra discret (desktop only)
-      if (isDesktop) {
-        tl.fromTo(
-          "[data-apertura-underline]",
-          { scaleX: 0, opacity: 0 },
-          { scaleX: 1, opacity: 1, transformOrigin: "center", duration: 0.6, ease: "none" },
-          0.55
-        );
-      }
     }, rootRef);
 
     return () => ctx.revert();
@@ -73,15 +63,16 @@ export default function AperturaOutro() {
 
   return (
     <section ref={rootRef as any} className="relative bg-graphite-soft">
-      {/* Halo chaud + respiration (cohérence home) */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(194,122,74,0.10),transparent_60%)]" />
-      {/* Vignette très douce pour “cinéma”, sans assombrir */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.14),transparent_58%)]" />
 
       <div className="relative mx-auto flex min-h-[92vh] max-w-6xl items-center justify-center px-4 py-24 md:px-8 lg:min-h-[100vh]">
         <div className="relative w-full">
-          <div ref={wordRef} className="relative mx-auto select-none text-center">
-            {/* Stroke layer (desktop) */}
+          <div
+            ref={wordRef}
+            className="relative mx-auto select-none text-center overflow-visible px-3 md:px-6"
+          >
+            {/* Stroke (desktop) */}
             <div
               data-apertura-stroke
               className="pointer-events-none absolute inset-0 hidden select-none lg:block"
@@ -89,15 +80,13 @@ export default function AperturaOutro() {
             >
               <span
                 className="block text-[14vw] font-semibold leading-none tracking-tight text-transparent"
-                style={{
-                  WebkitTextStroke: "1px rgba(244,247,249,0.30)",
-                }}
+                style={{ WebkitTextStroke: "1px rgba(244,247,249,0.30)" }}
               >
                 APERTURA
               </span>
             </div>
 
-            {/* Fill layer */}
+            {/* Fill */}
             <span className="relative block text-[14vw] font-semibold leading-none tracking-tight text-ivoire">
               APERTURA
             </span>
@@ -108,11 +97,6 @@ export default function AperturaOutro() {
           </p>
 
           <div className="mx-auto mt-10 h-px w-24 bg-cuivre/45" />
-          <div
-            data-apertura-underline
-            className="mx-auto mt-2 h-px w-10 bg-cuivre/25"
-            aria-hidden="true"
-          />
         </div>
       </div>
     </section>
