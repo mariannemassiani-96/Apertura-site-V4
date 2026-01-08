@@ -82,7 +82,7 @@ export const NewRequestClient = () => {
               reference,
               type,
               city,
-              status: "reçue",
+              status: "reçue" as const,
               description,
               attachments: files.map((file) => ({
                 name: file.name,
