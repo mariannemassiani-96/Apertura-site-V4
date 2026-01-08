@@ -123,13 +123,14 @@ export const NewRequestClient = () => {
           }));
 
           // 🔹 Nouvelle demande (TYPÉE)
+          const initialStatus: RequestItem["status"] = "reçue";
           const newItem: RequestItem = {
             id,
             createdAt: new Date().toISOString(),
             reference,
             type,
             city,
-            status: "reçue",
+            status: "reçue" as RequestItem["status"],
             description,
             attachments,
             emailSubject,
