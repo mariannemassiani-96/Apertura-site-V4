@@ -1,27 +1,23 @@
 "use client";
 
-import { useEffect } from "react";
-import Lenis from "lenis";
+import { PropsWithChildren, useEffect } from "react";
+import Lenis from "@studio-freight/lenis";
 
-export const LenisProvider = () => {
+export default function LenisProvider({ children }: PropsWithChildren) {
   useEffect(() => {
-    const isMobile = window.matchMedia("(max-width: 768px)").matches;
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduceMotion || isMobile) {
-      return;
-    }
-
     const lenis = new Lenis({
       duration: 1.1,
       smoothWheel: true,
-      smoothTouch: false,
+      // smoothTouch: false, // ❌ pas supporté par certaines versions de Lenis
     });
 
     let rafId = 0;
+
     const raf = (time: number) => {
       lenis.raf(time);
       rafId = requestAnimationFrame(raf);
     };
+
     rafId = requestAnimationFrame(raf);
 
     return () => {
@@ -30,5 +26,5 @@ export const LenisProvider = () => {
     };
   }, []);
 
-  return null;
-};
+  return <>{children}</>;
+}
