@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 import { siteContent } from "@/lib/content";
-import { LenisProvider } from "@/components/LenisProvider";
+import LenisProvider from "@/components/LenisProvider";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { SkipLink } from "@/components/SkipLink";
