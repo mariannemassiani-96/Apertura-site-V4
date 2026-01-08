@@ -70,6 +70,7 @@ export const siteContent = {
   },
   pageMeta: {
     home: {
+      
       title: "Menuiseries aluminium et PVC en Corse — Apertura di Corsica",
       description:
         "Menuiseries aluminium et PVC fabriquées en Corse, pensées pour la lumière, le confort et l’habitat méditerranéen.",
@@ -239,7 +240,41 @@ export const siteContent = {
         "Reflets sur un vitrage isolant",
         "Perspective d’un intérieur lumineux",
       ],
-    },
+    },rail: {
+  images: [
+    "/media/home/rail/01.jpg",
+    "/media/home/rail/02.jpg",
+    "/media/home/rail/03.jpg",
+    "/media/home/rail/04.jpg",
+    "/media/home/rail/05.jpg",
+    "/media/home/rail/06.jpg",
+    "/media/home/rail/07.jpg",
+    "/media/home/rail/08.jpg",
+    "/media/home/rail/09.jpg",
+    "/media/home/rail/10.jpg",
+    "/media/home/rail/11.jpg",
+    "/media/home/rail/12.jpg",
+    "/media/home/rail/13.jpg",
+    "/media/home/rail/14.jpg",
+  ],
+  alts: [
+    "Apertura – rail 01",
+    "Apertura – rail 02",
+    "Apertura – rail 03",
+    "Apertura – rail 04",
+    "Apertura – rail 05",
+    "Apertura – rail 06",
+    "Apertura – rail 07",
+    "Apertura – rail 08",
+    "Apertura – rail 09",
+    "Apertura – rail 10",
+    "Apertura – rail 11",
+    "Apertura – rail 12",
+    "Apertura – rail 13",
+    "Apertura – rail 14",
+  ],
+},
+
   },
   vision: {
     title: "Vision",

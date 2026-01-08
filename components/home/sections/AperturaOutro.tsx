@@ -1,0 +1,106 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import { ensureGsap, gsap } from "@/components/home/utils/gsap";
+import { useIsDesktop } from "@/components/home/hooks/useIsDesktop";
+import { usePrefersReducedMotion } from "@/components/home/hooks/usePrefersReducedMotion";
+
+export default function AperturaOutro() {
+  const rootRef = useRef<HTMLElement | null>(null);
+  const wordRef = useRef<HTMLDivElement | null>(null);
+
+  const isDesktop = useIsDesktop(1024);
+  const reduced = usePrefersReducedMotion();
+
+  useEffect(() => {
+    if (reduced) return;
+    if (!rootRef.current || !wordRef.current) return;
+
+    ensureGsap();
+
+    const ctx = gsap.context(() => {
+      const root = rootRef.current!;
+      const word = wordRef.current!;
+
+      // 1 timeline / 1 trigger
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: root,
+          start: "top bottom",
+          end: "top top",
+          scrub: 0.8,
+          // pin NOT necessary here (avoid iOS glitch); keep it simple
+          invalidateOnRefresh: true,
+        },
+      });
+
+      tl.fromTo(
+        word,
+        {
+          opacity: 0,
+          filter: "blur(10px)",
+          clipPath: "inset(0 100% 0 0 round 24px)",
+        },
+        {
+          opacity: 1,
+          filter: "blur(0px)",
+          clipPath: "inset(0 0% 0 0 round 24px)",
+          duration: 1,
+          ease: "none",
+        }
+      );
+
+      // Optional subtle stroke reveal on desktop only
+      if (isDesktop) {
+        tl.fromTo(
+          "[data-apertura-stroke]",
+          { opacity: 0 },
+          { opacity: 0.35, duration: 0.6 },
+          0.3
+        );
+      }
+    }, rootRef);
+
+    return () => ctx.revert();
+  }, [reduced, isDesktop]);
+
+  return (
+    <section ref={rootRef as any} className="relative bg-graphite">
+      <div className="mx-auto flex min-h-[92vh] max-w-6xl items-center justify-center px-4 py-24 md:px-8 lg:min-h-[100vh]">
+        <div className="relative w-full">
+          <div
+            ref={wordRef}
+            className="relative mx-auto select-none text-center"
+          >
+            {/* Stroke layer (desktop) */}
+            <div
+              data-apertura-stroke
+              className="pointer-events-none absolute inset-0 hidden select-none lg:block"
+              aria-hidden="true"
+            >
+              <span
+                className="block text-[14vw] font-semibold leading-none tracking-tight text-transparent"
+                style={{
+                  WebkitTextStroke: "1px rgba(244,247,249,0.35)",
+                }}
+              >
+                APERTURA
+              </span>
+            </div>
+
+            {/* Fill layer */}
+            <span className="relative block text-[14vw] font-semibold leading-none tracking-tight text-ivoire">
+              APERTURA
+            </span>
+          </div>
+
+          <p className="mx-auto mt-8 max-w-xl text-center text-sm leading-relaxed text-ivoire/65 md:text-base">
+            Depuis toujours, ouvrir est un art.
+          </p>
+
+          <div className="mx-auto mt-10 h-px w-24 bg-cuivre/60" />
+        </div>
+      </div>
+    </section>
+  );
+}

@@ -53,3 +53,19 @@ select:focus-visible {
     @apply text-2xl leading-snug;
   }
 }
+/* GSAP pin/transform iOS: mieux éviter le blur qui “tremble” */
+[data-rail-card] {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+/* Micro-grain discret (premium) */
+.bg-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.08'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+/* iOS-friendly blur: avoid super heavy filters */
+.safe-blur {
+  filter: blur(8px);
+  -webkit-filter: blur(8px);
+}
