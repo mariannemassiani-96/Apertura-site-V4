@@ -1,6 +1,7 @@
 "use client";
 
-import { PropsWithChildren, useEffect } from "react";
+import type { PropsWithChildren } from "react";
+import { useEffect } from "react";
 import Lenis from "lenis";
 
 export default function LenisProvider({ children }: PropsWithChildren) {
@@ -8,7 +9,7 @@ export default function LenisProvider({ children }: PropsWithChildren) {
     const lenis = new Lenis({
       duration: 1.1,
       smoothWheel: true,
-      // smoothTouch: false, // ❌ pas supporté par certaines versions de Lenis
+      // ⚠️ smoothTouch n'existe pas sur certaines versions/types de Lenis
     });
 
     let rafId = 0;
