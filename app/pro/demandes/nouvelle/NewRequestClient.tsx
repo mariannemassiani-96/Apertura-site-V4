@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { siteContent, labels } from "@/lib/content";
 import { getRequests, setRequests } from "@/lib/proStorage";
-import type { RequestItem } from "@/lib/pro/types";
+import type { RequestItem } from "@/lib/proStorage";
 
 /**
  * Génère une référence simple basée sur le timestamp
@@ -104,8 +104,8 @@ export const NewRequestClient = () => {
         onSubmit={(event) => {
           event.preventDefault();
 
-          // 🔹 Récupère les demandes existantes
-          const existing = getRequests();
+          // 🔹 Récupère les demandes existantes (TYPÉES)
+          const existing: RequestItem[] = getRequests();
 
           // 🔹 Identifiants
           const id = createReference(requestsUI.referencePrefix);
@@ -122,15 +122,17 @@ export const NewRequestClient = () => {
             type: file.type || "",
           }));
 
-          // 🔹 Nouvelle demande (TYPÉE)
+          // 🔹 Status strictement typé
           const initialStatus: RequestItem["status"] = "reçue";
+
+          // 🔹 Nouvelle demande (100 % conforme au type RequestItem)
           const newItem: RequestItem = {
             id,
             createdAt: new Date().toISOString(),
             reference,
             type,
             city,
-            status: "reçue" as RequestItem["status"],
+            status: initialStatus,
             description,
             attachments,
             emailSubject,
