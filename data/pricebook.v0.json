@@ -1,0 +1,22 @@
+{
+  "materials": {
+    "aluminium": {
+      "baseRate": 420,
+      "includesGlass": true
+    },
+    "pvc": {
+      "baseRate": 320,
+      "includesGlass": true
+    }
+  },
+  "glass": {
+    "standard": 0,
+    "securit": 65,
+    "acoustique": 85
+  },
+  "options": {
+    "coloris": 120,
+    "securite": 160,
+    "quincaillerie": 90
+  }
+}

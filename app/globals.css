@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-graphite text-ivoire antialiased;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 0);
+  background-size: 3px 3px;
+  opacity: 0.3;
+  mix-blend-mode: soft-light;
+  z-index: 0;
+}
+
+main {
+  position: relative;
+  z-index: 1;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #b36b4a;
+  outline-offset: 3px;
+}
+
+.section-title {
+  @apply text-sm uppercase tracking-[0.3em] text-ivoire/60;
+}
+
+.section-heading {
+  @apply text-3xl font-semibold leading-tight text-ivoire md:text-5xl;
+}
+
+.section-body {
+  @apply text-base leading-relaxed text-ivoire/70 md:text-lg;
+}
+
+@media (max-width: 768px) {
+  .section-heading {
+    @apply text-2xl leading-snug;
+  }
+}
