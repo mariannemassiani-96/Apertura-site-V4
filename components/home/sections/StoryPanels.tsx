@@ -50,18 +50,16 @@ export default function StoryPanels() {
     const ctx = gsap.context(() => {
       const slides = gsap.utils.toArray<HTMLElement>("[data-story-slide]");
 
-      // État initial
       gsap.set(slides, { opacity: 0 });
       gsap.set(slides[0], { opacity: 1 });
 
-      // 1 trigger + 1 timeline
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: rootRef.current!,
           start: "top top",
           end: () => `+=${panels.length * 900}`,
           scrub: 0.9,
-          pin: isDesktop, // pin desktop only
+          pin: isDesktop,
           anticipatePin: 1,
           invalidateOnRefresh: true,
         },
@@ -71,31 +69,20 @@ export default function StoryPanels() {
         const next = slides[i + 1];
         if (!next) return;
 
-        // crossfade + scale très léger
         tl.to(slide, { opacity: 0, duration: 0.45, ease: "none" }, i + 0.7);
         tl.fromTo(next, { opacity: 0 }, { opacity: 1, duration: 0.55, ease: "none" }, i + 0.7);
       });
 
-      tl.fromTo(
-        "[data-story-media]",
-        { scale: 1 },
-        { scale: 1.03, ease: "none", duration: panels.length },
-        0
-      );
+      tl.fromTo("[data-story-media]", { scale: 1 }, { scale: 1.03, ease: "none", duration: panels.length }, 0);
     }, rootRef);
 
     return () => ctx.revert();
   }, [isDesktop, reduced, panels.length]);
 
   return (
-    <section ref={rootRef as any} className="relative min-h-[100svh] overflow-hidden">
+    <section ref={rootRef as any} className="relative min-h-[100svh] overflow-hidden bg-graphite">
       {panels.map((p) => (
-        <div
-          key={p.n}
-          data-story-slide
-          className="absolute inset-0"
-          aria-hidden="true"
-        >
+        <div key={p.n} data-story-slide className="absolute inset-0" aria-hidden="true">
           <Image
             data-story-media
             src={p.img}
@@ -105,12 +92,20 @@ export default function StoryPanels() {
             sizes="100vw"
             className="object-cover"
           />
-          <div className="absolute inset-0 bg-black/45 md:bg-black/35" />
+
+          {/* Overlay “dark lumineux” : moins noir */}
+          <div className="absolute inset-0 bg-black/28 md:bg-black/18" />
+
+          {/* Halo chaud discret (cohérence avec Hero) */}
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(194,122,74,0.10),transparent_55%)]" />
+
+          {/* Lisibilité texte (sans noircir tout le visuel) */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-black/45 via-black/16 to-transparent md:from-black/40" />
 
           <div className="relative z-10 mx-auto flex min-h-[100svh] max-w-6xl items-end px-4 pb-16 pt-24 md:px-8">
             <div className="max-w-2xl">
-              <p className="text-xs tracking-[0.22em] text-ivoire/75">{p.n}</p>
-              <p className="mt-4 whitespace-pre-line text-2xl font-medium leading-snug md:text-4xl">
+              <p className="text-xs tracking-[0.22em] text-ivoire/60">{p.n}</p>
+              <p className="mt-4 whitespace-pre-line text-2xl font-medium leading-snug text-ivoire md:text-4xl">
                 {p.t}
               </p>
             </div>
@@ -118,7 +113,7 @@ export default function StoryPanels() {
         </div>
       ))}
 
-      {/* Mobile: si pas de pin, tout défile naturellement (lisible) */}
+      {/* Mobile: sans pin, tout défile naturellement (lisible) */}
       <div className="pointer-events-none invisible min-h-[100svh]" />
     </section>
   );

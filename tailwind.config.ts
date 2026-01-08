@@ -6,9 +6,11 @@ const config: Config = {
     extend: {
       colors: {
         maquis: "#1b2f28",
-        cuivre: "#b36b4a",
-        graphite: "#0c0d0f",
-        ivoire: "#f6f4ef",
+        cuivre: "#C27A4A",
+        graphite: "#161A18",
+        "graphite-soft": "#1D2320",
+        "graphite-card": "#0F1312",
+        ivoire: "#F4F7F9",
       },
       fontFamily: {
         sans: ["var(--font-sans)", "ui-sans-serif", "system-ui"],
