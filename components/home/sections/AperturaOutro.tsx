@@ -22,40 +22,49 @@ export default function AperturaOutro() {
       const root = rootRef.current!;
       const word = wordRef.current!;
 
+      // Entrée douce + “respiration”
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: root,
-          start: "top bottom",
-          end: "top top",
+          start: "top 85%",
+          end: "top 25%",
           scrub: 0.8,
           invalidateOnRefresh: true,
         },
       });
 
+      // Mot : safe (opacity + translate + légère “ouverture” tracking)
       tl.fromTo(
         word,
-        {
-          opacity: 0,
-          filter: "blur(10px)",
-          clipPath: "inset(0 100% 0 0)",
-        },
-        {
-          opacity: 1,
-          filter: "blur(0px)",
-          clipPath: "inset(0 0% 0 0)",
-          duration: 1,
-          ease: "none",
-        }
+        { opacity: 0, y: 18, letterSpacing: "0.02em" },
+        { opacity: 1, y: 0, letterSpacing: "-0.01em", duration: 1, ease: "none" },
+        0
       );
 
+      // Stroke desktop léger
       if (isDesktop) {
         tl.fromTo(
           "[data-apertura-stroke]",
           { opacity: 0 },
-          { opacity: 0.32, duration: 0.6 },
-          0.3
+          { opacity: 0.28, duration: 0.6, ease: "none" },
+          0.25
         );
       }
+
+      // Sous-texte + trait
+      tl.fromTo(
+        "[data-apertura-sub]",
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.7, ease: "none" },
+        0.35
+      );
+
+      tl.fromTo(
+        "[data-apertura-line]",
+        { scaleX: 0, opacity: 0, transformOrigin: "50% 50%" },
+        { scaleX: 1, opacity: 1, duration: 0.7, ease: "none" },
+        0.5
+      );
     }, rootRef);
 
     return () => ctx.revert();
@@ -66,11 +75,11 @@ export default function AperturaOutro() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(194,122,74,0.10),transparent_60%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.14),transparent_58%)]" />
 
-      <div className="relative mx-auto flex min-h-[92vh] max-w-6xl items-center justify-center px-4 py-24 md:px-8 lg:min-h-[100vh]">
+      <div className="relative mx-auto flex min-h-[100svh] max-w-6xl items-center justify-center px-4 py-24 md:px-8">
         <div className="relative w-full">
           <div
             ref={wordRef}
-            className="relative mx-auto select-none text-center overflow-visible px-3 md:px-6"
+            className="relative mx-auto select-none overflow-visible px-3 text-center md:px-6"
           >
             {/* Stroke (desktop) */}
             <div
@@ -92,11 +101,14 @@ export default function AperturaOutro() {
             </span>
           </div>
 
-          <p className="mx-auto mt-8 max-w-xl text-center text-sm leading-relaxed text-ivoire/70 md:text-base">
+          <p
+            data-apertura-sub
+            className="mx-auto mt-8 max-w-xl text-center text-sm leading-relaxed text-ivoire/70 md:text-base"
+          >
             Depuis toujours, ouvrir est un art.
           </p>
 
-          <div className="mx-auto mt-10 h-px w-24 bg-cuivre/45" />
+          <div data-apertura-line className="mx-auto mt-10 h-px w-24 bg-cuivre/45" />
         </div>
       </div>
     </section>
