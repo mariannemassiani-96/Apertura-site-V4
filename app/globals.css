@@ -69,3 +69,14 @@ select:focus-visible {
   filter: blur(8px);
   -webkit-filter: blur(8px);
 }
+html, body {
+  height: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+    animation-duration: 0.001ms !important;
+  }
+}
