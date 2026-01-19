@@ -2,35 +2,48 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef } from "react";
-import { siteContent } from "@/lib/content";
 import { ensureGsap, gsap } from "@/components/home/utils/gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { usePrefersReducedMotion } from "@/components/home/hooks/usePrefersReducedMotion";
+
+type RailItem = {
+  src: string;
+  alt: string;
+  key: string;
+  variant: number;
+};
 
 export default function HomeRail() {
   const rootRef = useRef<HTMLElement | null>(null);
   const reduced = usePrefersReducedMotion();
 
-  const images = siteContent.home.rail.images as string[];
-  const alts = siteContent.home.rail.alts as string[];
+  // ✅ TEMP : on réutilise les images “home story”
+  const items: RailItem[] = useMemo(() => {
+    const srcs = [
+      "/media/home/01.jpg",
+      "/media/home/02.jpg",
+      "/media/home/03.jpg",
+      "/media/home/04.jpg",
+      "/media/home/05.jpg",
+      "/media/home/06a.jpg",
+      "/media/home/06b.jpg",
+      "/media/home/07.jpg",
+      "/media/home/08.jpg",
+      "/media/home/09.jpg",
+    ];
 
-  const items = useMemo(
-    () =>
-      images.map((src, i) => ({
-        src,
-        alt: alts?.[i] ?? "Image Apertura di Corsica",
-        key: `${src}-${i}`,
-        variant: i % 6,
-      })),
-    [images, alts]
-  );
+    return srcs.map((src, i) => ({
+      src,
+      alt: "Image Apertura di Corsica",
+      key: `${src}-${i}`,
+      variant: i % 6,
+    }));
+  }, []);
 
   useEffect(() => {
     if (reduced) return;
     if (!rootRef.current) return;
 
     ensureGsap();
-    gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
       const cards = gsap.utils.toArray<HTMLElement>("[data-rail-card]");
@@ -38,19 +51,17 @@ export default function HomeRail() {
       cards.forEach((el) => {
         gsap.fromTo(
           el,
-          { opacity: 0.92, y: 10, scale: 1.01 },
+          { opacity: 0.9, y: 10 },
           {
             opacity: 1,
             y: 0,
-            scale: 1,
-            duration: 0.8,
+            duration: 0.6,
             ease: "none",
             scrollTrigger: {
               trigger: el,
               start: "top 85%",
               end: "top 55%",
               scrub: true,
-              invalidateOnRefresh: true,
             },
           }
         );
@@ -73,20 +84,21 @@ export default function HomeRail() {
           </p>
         </div>
 
+        {/* 2 colonnes desktop, 1 colonne mobile */}
         <div className="mt-10 grid gap-4 md:gap-6 lg:mt-14 lg:grid-cols-2">
           {items.map((it, idx) => {
-            const variant = it.variant;
+            const v = it.variant;
 
             const sizeClass =
-              variant === 0
+              v === 0
                 ? "h-[62vh]"
-                : variant === 1
+                : v === 1
                 ? "h-[54vh]"
-                : variant === 2
+                : v === 2
                 ? "h-[70vh]"
-                : variant === 3
+                : v === 3
                 ? "h-[58vh]"
-                : variant === 4
+                : v === 4
                 ? "h-[66vh]"
                 : "h-[52vh]";
 
@@ -111,7 +123,11 @@ export default function HomeRail() {
                   className="object-cover opacity-95 transition duration-700 will-change-transform lg:group-hover:scale-[1.03]"
                   priority={idx < 2}
                 />
+
+                {/* overlay doux */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/10 to-transparent opacity-70" />
+
+                {/* petit index discret */}
                 <figcaption className="absolute bottom-4 left-4 text-xs tracking-[0.22em] text-ivoire/70">
                   {String(idx + 1).padStart(2, "0")}
                 </figcaption>
