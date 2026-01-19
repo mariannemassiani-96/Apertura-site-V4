@@ -69,25 +69,33 @@ const STORY: StoryItem[] = [
     mediaSrc: "/media/home/05.jpg",
     mediaAlt: "Nature, sol, origine",
   },
+  // 6A (petits espaces)
   {
     key: "s6a",
     text: (
       <>
         Nous imaginons des habitats plus justes <br />
         mieux conçus <br />
-        faits pour durer
+        faits pour durer, <br />
+        <span data-story-detail className="text-ivoire/70">
+          dans les petits espaces
+        </span>
       </>
     ),
     mediaSrc: "/media/home/06a.jpg",
     mediaAlt: "Petite échelle",
   },
+  // 6B (grands espaces)
   {
     key: "s6b",
     text: (
       <>
         Nous imaginons des habitats plus justes <br />
         mieux conçus <br />
-        faits pour durer
+        faits pour durer, <br />
+        <span data-story-detail className="text-ivoire/70">
+          dans les grands espaces
+        </span>
       </>
     ),
     mediaSrc: "/media/home/06b.jpg",
@@ -138,7 +146,7 @@ export default function StoryCalloutCurve() {
   const [activeIndex, setActiveIndex] = useState(0);
   const count = STORY.length;
 
-  // desktop: un “moment” = 100svh
+  // Desktop: 1 “moment” = 100svh
   const totalHeight = useMemo(() => `${count * 100}svh`, [count]);
 
   useLayoutEffect(() => {
@@ -147,7 +155,7 @@ export default function StoryCalloutCurve() {
     ensureGsap();
     gsap.registerPlugin(ScrollTrigger);
 
-    // -------- Desktop pinned “story callout”
+    // -------- Desktop: pinned story callout (step-by-step)
     if (isDesktop) {
       if (!rootRef.current || !viewportRef.current) return;
 
@@ -172,7 +180,7 @@ export default function StoryCalloutCurve() {
         if (textEl) gsap.set(textEl, { opacity: 1, y: 0, willChange: "transform,opacity" });
         if (labelEl) gsap.set(labelEl, { x: -44, opacity: 0.92, willChange: "transform,opacity" });
 
-        // curve draw init
+        // curve init
         if (path) {
           const length = path.getTotalLength();
           gsap.set(path, {
@@ -192,6 +200,7 @@ export default function StoryCalloutCurve() {
             const next = clamp(Math.floor(self.progress * count), 0, count - 1);
             if (next === current) return;
 
+            const prev = current;
             current = next;
             setActiveIndex(next);
 
@@ -207,16 +216,34 @@ export default function StoryCalloutCurve() {
               });
             });
 
-            // texte “glisse” + ré-entrée
+            // texte : pour 6a -> 6b on évite un replay trop “lourd”
+            const prevText = STORY[prev]?.text;
+            const nextText = STORY[next]?.text;
+            const sameText = prevText === nextText;
+
             if (textEl) {
-              gsap.fromTo(
-                textEl,
-                { opacity: 0, y: MOTION.yIn },
-                { opacity: 1, y: 0, duration: 0.45, ease: MOTION.easeOut, overwrite: true }
-              );
+              if (sameText) {
+                gsap.to(textEl, { opacity: 1, y: 0, duration: 0.25, ease: "none", overwrite: true });
+              } else {
+                gsap.fromTo(
+                  textEl,
+                  { opacity: 0, y: MOTION.yIn },
+                  { opacity: 1, y: 0, duration: 0.45, ease: MOTION.easeOut, overwrite: true }
+                );
+              }
+
+              // nuance (petits/grands espaces) : micro entrée
+              const detail = textEl.querySelector<HTMLElement>("[data-story-detail]");
+              if (detail) {
+                gsap.fromTo(
+                  detail,
+                  { opacity: 0, y: 6 },
+                  { opacity: 1, y: 0, duration: 0.35, ease: MOTION.easeOut, overwrite: true }
+                );
+              }
             }
 
-            // label savor : micro drift horizontal
+            // label drift
             if (labelEl) {
               gsap.fromTo(
                 labelEl,
@@ -225,7 +252,7 @@ export default function StoryCalloutCurve() {
               );
             }
 
-            // courbe : redessine légèrement à chaque step (petit reset + redraw)
+            // courbe redraw léger
             if (path) {
               const length = path.getTotalLength();
               gsap.set(path, { strokeDashoffset: length });
@@ -240,7 +267,7 @@ export default function StoryCalloutCurve() {
       return () => ctx.revert();
     }
 
-    // -------- Mobile/tablet : stack (lecture libre)
+    // -------- Mobile/tablet: stack (lecture libre)
     if (!mobileRef.current) return;
 
     const ctx = gsap.context(() => {
@@ -311,11 +338,18 @@ export default function StoryCalloutCurve() {
   return (
     <section ref={rootRef} className="relative w-full bg-graphite" style={{ height: totalHeight }}>
       <div ref={viewportRef} className="sticky top-0 h-[100svh] w-full overflow-hidden">
-        {/* MEDIA plein écran */}
+        {/* MEDIA full screen */}
         <div className="absolute inset-0">
           {STORY.map((item, idx) => (
             <div key={item.key} data-layer data-index={idx} className="absolute inset-0">
-              <Image src={item.mediaSrc} alt={item.mediaAlt} fill priority={idx <= 1} sizes="100vw" className="object-cover" />
+              <Image
+                src={item.mediaSrc}
+                alt={item.mediaAlt}
+                fill
+                priority={idx <= 1}
+                sizes="100vw"
+                className="object-cover"
+              />
               <div className="absolute inset-0 bg-black/45 md:bg-black/35" />
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(194,122,74,0.10),transparent_55%)]" />
               <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black/55 via-black/18 to-transparent" />
@@ -325,14 +359,14 @@ export default function StoryCalloutCurve() {
 
         {/* CALLOUT CURVE + TEXT */}
         <div className="relative mx-auto flex h-[100svh] max-w-6xl flex-col justify-between px-4 py-20 md:px-8 lg:py-28">
-          {/* Label + ligne (savor) */}
+          {/* Label */}
           <div data-story-label className="mx-auto flex w-full max-w-3xl items-center gap-6 text-sm text-ivoire/85">
             <span className="whitespace-nowrap">Apertura</span>
             <span className="h-px flex-1 bg-ivoire/30" />
             <span className="whitespace-nowrap">di Corsica</span>
           </div>
 
-          {/* Courbe */}
+          {/* Curve */}
           <div className="relative">
             <svg className="h-[48svh] w-full" viewBox="0 0 1200 520" fill="none" aria-hidden="true">
               <path
@@ -344,19 +378,16 @@ export default function StoryCalloutCurve() {
               />
             </svg>
 
-            {/* Texte à droite (exactement ton texte actif) */}
+            {/* Text right */}
             <div className="pointer-events-none absolute bottom-12 right-0 max-w-sm text-left">
               <div data-story-text className="text-ivoire/92 text-[18px] leading-[1.3] md:text-[22px]">
                 {active.text}
               </div>
 
-              {/* Progress discret */}
+              {/* Progress */}
               <div className="mt-4 flex items-center gap-3">
                 <div className="h-[2px] w-24 overflow-hidden rounded bg-ivoire/15">
-                  <div
-                    className="h-full bg-ivoire/70"
-                    style={{ width: `${((activeIndex + 1) / count) * 100}%` }}
-                  />
+                  <div className="h-full bg-ivoire/70" style={{ width: `${((activeIndex + 1) / count) * 100}%` }} />
                 </div>
                 <div className="text-[11px] tracking-[0.2em] text-ivoire/55">
                   {String(activeIndex + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}
@@ -366,7 +397,7 @@ export default function StoryCalloutCurve() {
           </div>
         </div>
 
-        {/* Accessibilité */}
+        {/* A11y */}
         <div className="sr-only">
           {STORY.map((item) => (
             <div key={`sr-${item.key}`}>{item.text}</div>
