@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { ensureGsap, gsap } from "@/components/home/utils/gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useIsDesktop } from "@/components/home/hooks/useIsDesktop";
 import { usePrefersReducedMotion } from "@/components/home/hooks/usePrefersReducedMotion";
 
@@ -17,27 +18,35 @@ export default function HomeHero() {
     if (!rootRef.current || !mediaRef.current) return;
 
     ensureGsap();
+    gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
+      const root = rootRef.current!;
+      const media = mediaRef.current!;
+
+      // Init (évite flash)
+      gsap.set(media, { scale: 1, willChange: "transform" });
+      gsap.set("[data-hero-text]", { opacity: 0, y: 10, willChange: "transform,opacity" });
+
       const tl = gsap.timeline({
         scrollTrigger: {
-          trigger: rootRef.current!,
+          trigger: root,
           start: "top top",
-          end: "+=600",
-          scrub: 0.8,
+          end: "+=120%", // plus adaptatif que 600px
+          scrub: 0.85,
           pin: isDesktop, // pin léger desktop only
           anticipatePin: 1,
+          invalidateOnRefresh: true,
         },
       });
 
-      // Micro mouvement uniquement (ciné, pas gadget)
-      tl.fromTo(mediaRef.current!, { scale: 1 }, { scale: 1.05, ease: "none" }, 0);
+      // Micro mouvement (ciné, pas gadget)
+      tl.to(media, { scale: 1.055, ease: "none" }, 0);
 
-      // Texte discret (sans blur iOS)
-      tl.fromTo(
+      // Texte discret (apparition + tenue)
+      tl.to(
         "[data-hero-text]",
-        { opacity: 0, y: 10 },
-        { opacity: 1, y: 0, duration: 0.35, ease: "none" },
+        { opacity: 1, y: 0, duration: 0.25, ease: "none" },
         0.05
       );
     }, rootRef);
@@ -46,12 +55,7 @@ export default function HomeHero() {
   }, [isDesktop, reduced]);
 
   return (
-    // Si tu veux compenser le pt-20 global du layout :
-    // remplace "min-h-[100svh]" par "h-[100svh]" + ajoute "-mt-20"
-    <section
-      ref={rootRef as any}
-      className="relative -mt-20 h-[100svh] overflow-hidden bg-graphite"
-    >
+    <section ref={rootRef as any} className="relative -mt-20 h-[100svh] overflow-hidden bg-graphite">
       <video
         ref={mediaRef}
         className="absolute inset-0 h-full w-full object-cover"
@@ -63,30 +67,32 @@ export default function HomeHero() {
         preload="metadata"
       />
 
-      {/* Overlay “dark lumineux” : moins noir + plus respirant */}
+      {/* Overlay “dark lumineux” */}
       <div className="absolute inset-0 bg-black/30 md:bg-black/18" />
 
-      {/* Halo chaud discret (donne la sensation de lumière, sans jaunir) */}
+      {/* Halo chaud discret */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(194,122,74,0.12),transparent_55%)]" />
 
-      {/* Gradient bas pour assurer la lisibilité (mais très léger) */}
+      {/* Gradient bas lisibilité */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black/45 via-black/18 to-transparent md:from-black/40" />
 
       {/* Contenu minimal */}
       <div className="relative z-10 mx-auto flex min-h-[100svh] max-w-6xl flex-col justify-end px-4 pb-10 pt-24 md:px-8 md:pb-12">
         <div data-hero-text className="max-w-md">
-          <p className="text-[11px] tracking-[0.28em] text-ivoire/55">
-            APERTURA DI CORSICA
-          </p>
+          <p className="text-[11px] tracking-[0.28em] text-ivoire/55">APERTURA DI CORSICA</p>
 
-          {/* Scroll hint subtil (pas un CTA) */}
+          {/* Scroll hint subtil */}
           <div className="mt-6 flex items-center gap-3 text-[11px] tracking-[0.24em] text-ivoire/55 uppercase">
             <span className="inline-block h-[1px] w-10 bg-ivoire/25" />
             <span>Scroll</span>
 
-            {/* petit indicateur “dot” */}
             <span className="relative ml-2 inline-flex h-7 w-5 items-start justify-center rounded-full border border-ivoire/25">
-              <span className="mt-1 block h-1 w-1 animate-[homeScrollDot_1.6s_ease-in-out_infinite] rounded-full bg-ivoire/60" />
+              <span
+                className={[
+                  "mt-1 block h-1 w-1 rounded-full bg-ivoire/60",
+                  reduced ? "" : "animate-[homeScrollDot_1.6s_ease-in-out_infinite]",
+                ].join(" ")}
+              />
             </span>
           </div>
         </div>
