@@ -14,7 +14,6 @@ export default function LenisProvider({ children }: PropsWithChildren) {
       /iPad|iPhone|iPod/.test(navigator.userAgent) ||
       (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
-    // ✅ coupe Lenis sur iOS + respecte reduced motion
     if (prefersReduced || isIOS) return;
 
     ensureGsap();
@@ -25,19 +24,18 @@ export default function LenisProvider({ children }: PropsWithChildren) {
       smoothWheel: true,
     });
 
-    // 1) Lenis -> ScrollTrigger
+    // ✅ Lenis -> ScrollTrigger
     lenis.on("scroll", ScrollTrigger.update);
 
-    // 2) GSAP ticker pilote Lenis (évite double RAF et colle aux ScrollTriggers)
+    // ✅ Utiliser le ticker GSAP (meilleur que double RAF)
     const tick = (time: number) => {
-      // gsap ticker est en secondes, lenis en ms
-      lenis.raf(time * 1000);
+      lenis.raf(time * 1000); // ticker = seconds, lenis = ms
     };
     gsap.ticker.add(tick);
     gsap.ticker.lagSmoothing(0);
 
-    // 3) refresh après init
-    ScrollTrigger.refresh();
+    // ✅ Refresh après init
+    requestAnimationFrame(() => ScrollTrigger.refresh());
 
     return () => {
       gsap.ticker.remove(tick);
