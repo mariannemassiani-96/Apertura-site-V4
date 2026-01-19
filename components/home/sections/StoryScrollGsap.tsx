@@ -1,4 +1,4 @@
-"use client";
+ia"use client";
 
 import Image from "next/image";
 import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -18,7 +18,7 @@ const STORY: StoryItem[] = [
   {
     key: "s1",
     text: <>DES OUVERTURES QUI FONT DU BIEN</>,
-    mediaSrc: "/home/01.jpg",
+    mediaSrc: "/media/home/01.jpg",
     mediaAlt: "Collectif, lumière, chaleur",
   },
   // 2
@@ -30,7 +30,7 @@ const STORY: StoryItem[] = [
         à la lumière dans les espaces
       </>
     ),
-    mediaSrc: "/home/02.jpg",
+    mediaSrc: "/media/home/02.jpg",
     mediaAlt: "Matière brute et lumière",
   },
   // 3
@@ -43,7 +43,7 @@ const STORY: StoryItem[] = [
         et rendre les lieux plus agréables à vivre
       </>
     ),
-    mediaSrc: "/home/03.jpg",
+    mediaSrc: "/media/home/03.jpg",
     mediaAlt: "Vie quotidienne collective",
   },
   // 4
@@ -56,7 +56,7 @@ const STORY: StoryItem[] = [
         sans promesses inutiles
       </>
     ),
-    mediaSrc: "/home/04.jpg",
+    mediaSrc: "/media/home/04.jpg",
     mediaAlt: "Contre-rythme, presque vide",
   },
   // 5
@@ -69,7 +69,7 @@ const STORY: StoryItem[] = [
         sans oublier d’où viennent les choses
       </>
     ),
-    mediaSrc: "/home/05.jpg",
+    mediaSrc: "/media/home/05.jpg",
     mediaAlt: "Nature, sol, origine",
   },
   // 6A (petite échelle)
@@ -82,7 +82,7 @@ const STORY: StoryItem[] = [
         faits pour durer
       </>
     ),
-    mediaSrc: "/home/06a.jpg",
+    mediaSrc: "/media/home/06a.jpg",
     mediaAlt: "Petite échelle",
   },
   // 6B (grande échelle)
@@ -95,7 +95,7 @@ const STORY: StoryItem[] = [
         faits pour durer
       </>
     ),
-    mediaSrc: "/home/06b.jpg",
+    mediaSrc: "/media/home/06b.jpg",
     mediaAlt: "Grande échelle",
   },
   // 7
@@ -108,7 +108,7 @@ const STORY: StoryItem[] = [
         par la manière dont on habite vraiment
       </>
     ),
-    mediaSrc: "/home/07.jpg",
+    mediaSrc: "/media/home/07.jpg",
     mediaAlt: "Climat vécu",
   },
   // 8
@@ -121,14 +121,14 @@ const STORY: StoryItem[] = [
         un confort qui se ressent
       </>
     ),
-    mediaSrc: "/home/08.jpg",
+    mediaSrc: "/media/home/08.jpg",
     mediaAlt: "Sensorialité, main, matière",
   },
   // 9
   {
     key: "s9",
     text: <>L’avenir s’ouvre ici</>,
-    mediaSrc: "/home/09.jpg",
+    mediaSrc: "/media/home/09.jpg",
     mediaAlt: "Ouverture finale, horizon",
   },
 ];
