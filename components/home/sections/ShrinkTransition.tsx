@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { ensureGsap, gsap } from "@/components/home/utils/gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useIsDesktop } from "@/components/home/hooks/useIsDesktop";
 import { usePrefersReducedMotion } from "@/components/home/hooks/usePrefersReducedMotion";
 
@@ -19,31 +20,41 @@ export default function ShrinkTransition() {
     if (!rootRef.current || !cardRef.current) return;
 
     ensureGsap();
+    gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
+      const root = rootRef.current!;
+      const card = cardRef.current!;
+
+      // init (évite flash / optimise)
+      gsap.set(card, { willChange: "transform,border-radius" });
+      gsap.set("[data-shrink-text]", { opacity: 0, y: 10, willChange: "transform,opacity" });
+
       const tl = gsap.timeline({
         scrollTrigger: {
-          trigger: rootRef.current!,
+          trigger: root,
           start: "top top",
-          end: "+=900",
+          end: "+=130%", // adaptatif (au lieu de 900px)
           scrub: 0.85,
           pin: true,
           anticipatePin: 1,
+          invalidateOnRefresh: true,
         },
       });
 
+      // Geste unique : “cadre qui se resserre”
       tl.fromTo(
-        cardRef.current!,
+        card,
         { scale: 1, borderRadius: 0, y: 0 },
         { scale: 0.72, borderRadius: 24, y: -10, ease: "none" },
         0
       );
 
-      tl.fromTo(
+      // Texte : apparition sobre (pas de blur)
+      tl.to(
         "[data-shrink-text]",
-        { opacity: 0, y: 10, filter: "blur(6px)" },
-        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.35, ease: "none" },
-        0.1
+        { opacity: 1, y: 0, duration: 0.35, ease: "none" },
+        0.12
       );
     }, rootRef);
 
@@ -70,10 +81,7 @@ export default function ShrinkTransition() {
               priority={false}
             />
 
-            {/* Overlay “dark lumineux” (moins noir) */}
             <div className="absolute inset-0 bg-black/18 md:bg-black/14" />
-
-            {/* Gradient bas très léger pour le texte si l’image est sombre */}
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[40%] bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
           </div>
 
