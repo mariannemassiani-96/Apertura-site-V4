@@ -3,68 +3,69 @@
 import { useEffect, useRef } from "react";
 import { ensureGsap, gsap } from "@/components/home/utils/gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useIsDesktop } from "@/components/home/hooks/useIsDesktop";
+import { usePrefersReducedMotion } from "@/components/home/hooks/usePrefersReducedMotion";
 
 export default function AperturaFooter() {
   const rootRef = useRef<HTMLElement | null>(null);
 
- useEffect(() => {
-  if (reduced) return;
-  if (!rootRef.current) return;
+  const reduced = usePrefersReducedMotion();
+  const isDesktop = useIsDesktop(1024);
 
-  ensureGsap();
-  gsap.registerPlugin(ScrollTrigger);
+  useEffect(() => {
+    if (reduced) return;
+    if (!rootRef.current) return;
 
-  const ctx = gsap.context(() => {
-    // ✅ État initial forcé (sinon parfois tu “ne vois rien” bouger)
-    gsap.set("[data-ap-word]", { opacity: 0, y: 24, letterSpacing: "0.08em" });
-    gsap.set("[data-ap-sub]", { opacity: 0, y: 12 });
-    gsap.set("[data-ap-line]", { opacity: 0, scaleX: 0, transformOrigin: "50% 50%" });
-    gsap.set("[data-ap-stroke]", { opacity: 0 });
+    ensureGsap();
+    gsap.registerPlugin(ScrollTrigger);
 
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: rootRef.current!,
-        start: "top bottom",
-        end: "+=420",
-        scrub: 0.9,
-        pin: true,              // ✅ pause visuelle façon savor
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-        // markers: true,        // 🔥 DEBUG (à activer 30s si besoin)
-      },
-    });
+    const ctx = gsap.context(() => {
+      const root = rootRef.current!;
 
-    tl.to(
-      "[data-ap-word]",
-      { opacity: 1, y: 0, letterSpacing: "-0.01em", duration: 1, ease: "power3.out" },
-      0
-    )
-      .to(
-        "[data-ap-sub]",
-        { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" },
-        0.25
-      )
-      .to(
-        "[data-ap-line]",
-        { opacity: 1, scaleX: 1, duration: 0.8, ease: "power3.out" },
-        0.4
-      );
+      const q = (sel: string) => root.querySelector(sel) as HTMLElement | null;
+      const word = q("[data-ap-word]");
+      const sub = q("[data-ap-sub]");
+      const line = q("[data-ap-line]");
+      const stroke = q("[data-ap-stroke]");
 
-    if (isDesktop) {
-      tl.to("[data-ap-stroke]", { opacity: 0.28, duration: 0.9, ease: "power2.out" }, 0.15);
-    }
-  }, rootRef);
+      if (!word || !sub || !line) return;
 
-  return () => ctx.revert();
-}, [reduced, isDesktop]);
+      // ✅ état initial forcé
+      gsap.set(word, { opacity: 0, y: 24, letterSpacing: "0.08em" });
+      gsap.set(sub, { opacity: 0, y: 12 });
+      gsap.set(line, { opacity: 0, scaleX: 0, transformOrigin: "50% 50%" });
+      if (stroke) gsap.set(stroke, { opacity: 0 });
 
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: root,
+          start: "top bottom",
+          end: "+=420",
+          scrub: 0.9,
+          pin: true, // ✅ “respiration” façon savor
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          // markers: true, // 🔥 active 20s si tu veux vérifier que ça trigger
+        },
+      });
+
+      tl.to(word, { opacity: 1, y: 0, letterSpacing: "-0.01em", duration: 1, ease: "power3.out" }, 0)
+        .to(sub, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }, 0.25)
+        .to(line, { opacity: 1, scaleX: 1, duration: 0.8, ease: "power3.out" }, 0.4);
+
+      if (isDesktop && stroke) {
+        tl.to(stroke, { opacity: 0.28, duration: 0.9, ease: "power2.out" }, 0.15);
+      }
+    }, rootRef);
+
+    return () => ctx.revert();
+  }, [reduced, isDesktop]);
 
   return (
     <section ref={rootRef as any} className="relative w-full bg-graphite-soft">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(194,122,74,0.10),transparent_60%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.14),transparent_58%)]" />
 
-      {/* ✅ CENTRAGE BÉTON : wrapper full + flex center */}
       <div className="relative w-full">
         <div className="mx-auto flex min-h-[70svh] w-full max-w-6xl items-center justify-center px-4 py-20 md:px-8">
           <div className="w-full text-center">
@@ -106,3 +107,4 @@ export default function AperturaFooter() {
     </section>
   );
 }
+
