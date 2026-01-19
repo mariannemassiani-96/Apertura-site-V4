@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from "react";
 import { ensureGsap, gsap } from "@/components/home/utils/gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useIsDesktop } from "@/components/home/hooks/useIsDesktop";
 import { usePrefersReducedMotion } from "@/components/home/hooks/usePrefersReducedMotion";
 
@@ -29,7 +28,11 @@ function SplitWordFill({ text }: { text: string }) {
 /** Stroke (desktop) */
 function SplitWordStroke({ text }: { text: string }) {
   return (
-    <div data-ap-stroke className="pointer-events-none absolute inset-0 hidden select-none lg:block" aria-hidden="true">
+    <div
+      data-ap-stroke
+      className="pointer-events-none absolute inset-0 hidden select-none lg:block"
+      aria-hidden="true"
+    >
       <span className="block text-[14vw] font-semibold leading-none tracking-tight text-transparent">
         <span className="sr-only">{text}</span>
         <span
@@ -59,7 +62,6 @@ export default function AperturaFooter() {
     if (!pinRef.current) return;
 
     ensureGsap();
-    gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
       const pin = pinRef.current!;
@@ -73,11 +75,9 @@ export default function AperturaFooter() {
       if (!sub || !line || chars.length === 0) return;
 
       const setInitial = () => {
-        // Fill
         gsap.set(chars, { opacity: 0, yPercent: 18, rotateZ: -0.6 });
         if (wordWrap) gsap.set(wordWrap, { letterSpacing: "0.06em" });
 
-        // Stroke (desktop)
         if (isDesktop && strokeChars.length) {
           gsap.set(strokeChars, { opacity: 0, yPercent: 18, rotateZ: -0.4 });
         }
@@ -90,7 +90,6 @@ export default function AperturaFooter() {
 
       const tl = gsap.timeline({ defaults: { ease: "none" } });
 
-      // -------- Fill letters (premium overlap)
       tl.to(
         chars,
         {
@@ -99,21 +98,15 @@ export default function AperturaFooter() {
           rotateZ: 0,
           duration: 0.28,
           ease: "power3.out",
-          stagger: { each: 0.035, from: "start" }, // overlap 2–3 lettres
+          stagger: { each: 0.035, from: "start" },
         },
         0
       );
 
-      // Tracking qui se resserre (subtil)
       if (wordWrap) {
-        tl.to(
-          wordWrap,
-          { letterSpacing: "0.00em", duration: 0.55, ease: "power2.out" },
-          0.02
-        );
+        tl.to(wordWrap, { letterSpacing: "0.00em", duration: 0.55, ease: "power2.out" }, 0.02);
       }
 
-      // -------- Stroke letters (desktop) : léger décalage, discret
       if (isDesktop && strokeChars.length) {
         tl.to(
           strokeChars,
@@ -125,11 +118,10 @@ export default function AperturaFooter() {
             ease: "power3.out",
             stagger: { each: 0.03, from: "start" },
           },
-          0.10
+          0.1
         );
       }
 
-      // -------- Micro-settle (respiration premium)
       tl.to(
         chars,
         {
@@ -139,19 +131,13 @@ export default function AperturaFooter() {
           ease: "power2.out",
           stagger: { each: 0.02 },
         },
-        "-=0.10"
+        "-=0.1"
       );
 
       if (isDesktop && strokeChars.length) {
         tl.to(
           strokeChars,
-          {
-            yPercent: 0,
-            rotateZ: 0,
-            duration: 0.18,
-            ease: "power2.out",
-            stagger: { each: 0.018 },
-          },
+          { yPercent: 0, rotateZ: 0, duration: 0.18, ease: "power2.out", stagger: { each: 0.018 } },
           "-=0.14"
         );
       }
@@ -159,20 +145,23 @@ export default function AperturaFooter() {
       tl.to(sub, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 0.28).to(
         line,
         { opacity: 1, scaleX: 1, duration: 0.65, ease: "power3.out" },
-        0.40
+        0.4
       );
 
-      ScrollTrigger.create({
+      // ✅ pin plus court : ~55vh au lieu de 180% de viewport
+      gsap.timeline(); // no-op (garde GSAP “chaud”)
+      const st = ScrollTrigger.create({
         trigger: pin,
         start: "top top",
-        end: "+=180%",
-        scrub: 0.9,
+        end: () => `+=${Math.round(window.innerHeight * 0.55)}`,
+        scrub: 0.75,
         pin: true,
         anticipatePin: 1,
         invalidateOnRefresh: true,
         animation: tl,
-        // markers: true,
       });
+
+      return () => st.kill();
     }, pinRef);
 
     return () => ctx.revert();
@@ -185,7 +174,10 @@ export default function AperturaFooter() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(194,122,74,0.10),transparent_60%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.14),transparent_58%)]" />
 
-        <div ref={pinRef} className="relative flex min-h-[75svh] w-full items-center justify-center px-4 py-20 md:px-8">
+        <div
+          ref={pinRef}
+          className="relative flex min-h-[62svh] w-full items-center justify-center px-4 py-20 md:px-8"
+        >
           <div className="w-full text-center">
             <div className="relative mx-auto w-full select-none">
               <SplitWordStroke text="APERTURA" />
