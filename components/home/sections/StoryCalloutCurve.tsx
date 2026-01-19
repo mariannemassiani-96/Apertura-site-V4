@@ -94,7 +94,7 @@ const STORY: StoryItem[] = [
         mieux conçus <br />
         faits pour durer, <br />
         <span data-story-detail className="text-ivoire/70">
-          dans les grands espaces
+          ou dans les grands espaces
         </span>
       </>
     ),
@@ -135,6 +135,20 @@ const STORY: StoryItem[] = [
 
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
 
+// --- Drift offsets (Savor feel)
+const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5)); // ~2.399963...
+
+function makeOffsets(count: number, mx: number, my: number) {
+  return Array.from({ length: count }, (_, i) => {
+    const t = (i + 1) * GOLDEN_ANGLE;
+    const r = 0.55 + 0.35 * ((i % 5) / 4); // légère variation, pas un motif trop “math”
+    return {
+      x: Math.round(Math.cos(t) * mx * r),
+      y: Math.round(Math.sin(t) * my * r),
+    };
+  });
+}
+
 export default function StoryCalloutCurve() {
   const rootRef = useRef<HTMLElement | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
@@ -146,14 +160,12 @@ export default function StoryCalloutCurve() {
   const [activeIndex, setActiveIndex] = useState(0);
   const count = STORY.length;
 
-  // Desktop: 1 “moment” = 100svh
   const totalHeight = useMemo(() => `${count * 100}svh`, [count]);
 
   useLayoutEffect(() => {
     if (reduced) return;
 
-    ensureGsap();
-    gsap.registerPlugin(ScrollTrigger);
+    ensureGsap(); // ScrollTrigger est déjà enregistré ici
 
     // -------- Desktop: pinned story callout (step-by-step)
     if (isDesktop) {
@@ -168,11 +180,24 @@ export default function StoryCalloutCurve() {
 
         let current = 0;
 
-        // init layers
+        const measure = () => ({
+          mx: Math.round(window.innerWidth * 0.045), // 4.5vw
+          my: Math.round(window.innerHeight * 0.045), // 4.5vh
+        });
+
+        let { mx, my } = measure();
+        let OFFSETS = makeOffsets(count, mx, my);
+
+        // init layers (avec drift)
         layers.forEach((el, i) => {
+          const o = OFFSETS[i] ?? { x: 0, y: 0 };
           gsap.set(el, {
             opacity: i === 0 ? 1 : 0,
-            scale: i === 0 ? 1 : 1.02,
+            // overscale un peu plus élevé car on translate légèrement
+            scale: i === 0 ? 1.03 : 1.07,
+            x: i === 0 ? 0 : o.x,
+            y: i === 0 ? 0 : o.y,
+            transformOrigin: "50% 50%",
             willChange: "transform,opacity",
           });
         });
@@ -191,11 +216,25 @@ export default function StoryCalloutCurve() {
           });
         }
 
+        const onRefreshInit = () => {
+          ({ mx, my } = measure());
+          OFFSETS = makeOffsets(count, mx, my);
+
+          // on remet les offsets “repos” (non visibles) sur les layers non actifs
+          layers.forEach((el) => {
+            const idx = Number(el.dataset.index);
+            if (idx === current) return;
+            const o = OFFSETS[idx] ?? { x: 0, y: 0 };
+            gsap.set(el, { x: o.x, y: o.y, scale: 1.07 });
+          });
+        };
+
+        ScrollTrigger.addEventListener("refreshInit", onRefreshInit);
+
         const st = ScrollTrigger.create({
           trigger: rootRef.current!,
           start: "top top",
           end: "bottom bottom",
-          // pas de scrub : on “step”
           onUpdate: (self) => {
             const next = clamp(Math.floor(self.progress * count), 0, count - 1);
             if (next === current) return;
@@ -204,19 +243,24 @@ export default function StoryCalloutCurve() {
             current = next;
             setActiveIndex(next);
 
-            // image crossfade
+            // image crossfade + drift spatial (Savor)
             layers.forEach((layer) => {
-              const isActive = Number(layer.dataset.index) === next;
+              const idx = Number(layer.dataset.index);
+              const isActive = idx === next;
+              const o = OFFSETS[idx] ?? { x: 0, y: 0 };
+
               gsap.to(layer, {
                 opacity: isActive ? 1 : 0,
-                scale: isActive ? 1 : 1.02,
+                scale: isActive ? 1.03 : 1.07,
+                x: isActive ? 0 : o.x,
+                y: isActive ? 0 : o.y,
                 duration: MOTION.fadeDur,
                 ease: MOTION.easeOut,
                 overwrite: true,
               });
             });
 
-            // texte : pour 6a -> 6b on évite un replay trop “lourd”
+            // texte : pour 6a -> 6b, on évite un replay trop lourd
             const prevText = STORY[prev]?.text;
             const nextText = STORY[next]?.text;
             const sameText = prevText === nextText;
@@ -243,7 +287,7 @@ export default function StoryCalloutCurve() {
               }
             }
 
-            // label drift
+            // label drift horizontal
             if (labelEl) {
               gsap.fromTo(
                 labelEl,
@@ -261,7 +305,10 @@ export default function StoryCalloutCurve() {
           },
         });
 
-        return () => st.kill();
+        return () => {
+          ScrollTrigger.removeEventListener("refreshInit", onRefreshInit);
+          st.kill();
+        };
       }, rootRef);
 
       return () => ctx.revert();
@@ -342,14 +389,7 @@ export default function StoryCalloutCurve() {
         <div className="absolute inset-0">
           {STORY.map((item, idx) => (
             <div key={item.key} data-layer data-index={idx} className="absolute inset-0">
-              <Image
-                src={item.mediaSrc}
-                alt={item.mediaAlt}
-                fill
-                priority={idx <= 1}
-                sizes="100vw"
-                className="object-cover"
-              />
+              <Image src={item.mediaSrc} alt={item.mediaAlt} fill priority={idx <= 1} sizes="100vw" className="object-cover" />
               <div className="absolute inset-0 bg-black/45 md:bg-black/35" />
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(194,122,74,0.10),transparent_55%)]" />
               <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black/55 via-black/18 to-transparent" />
