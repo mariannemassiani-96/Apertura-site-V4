@@ -73,11 +73,13 @@ export default function AperturaFooter() {
       if (!sub || !line || chars.length === 0) return;
 
       const setInitial = () => {
-        gsap.set(chars, { opacity: 0, y: 18 });
-        if (wordWrap) gsap.set(wordWrap, { letterSpacing: "0.08em" });
+        // Fill
+        gsap.set(chars, { opacity: 0, yPercent: 18, rotateZ: -0.6 });
+        if (wordWrap) gsap.set(wordWrap, { letterSpacing: "0.06em" });
 
+        // Stroke (desktop)
         if (isDesktop && strokeChars.length) {
-          gsap.set(strokeChars, { opacity: 0, y: 18 });
+          gsap.set(strokeChars, { opacity: 0, yPercent: 18, rotateZ: -0.4 });
         }
 
         gsap.set(sub, { opacity: 0, y: 12 });
@@ -88,40 +90,87 @@ export default function AperturaFooter() {
 
       const tl = gsap.timeline({ defaults: { ease: "none" } });
 
-      // lettres (fill)
-      tl.to(chars, { opacity: 1, y: 0, duration: 0.6, stagger: 0.06 }, 0);
+      // -------- Fill letters (premium overlap)
+      tl.to(
+        chars,
+        {
+          opacity: 1,
+          yPercent: 0,
+          rotateZ: 0,
+          duration: 0.28,
+          ease: "power3.out",
+          stagger: { each: 0.035, from: "start" }, // overlap 2–3 lettres
+        },
+        0
+      );
 
-      // tracking qui se resserre
-      if (wordWrap) tl.to(wordWrap, { letterSpacing: "-0.01em", duration: 0.8 }, 0);
-
-      // stroke lettre par lettre (desktop)
-      if (isDesktop && strokeChars.length) {
-        tl.to(strokeChars, { opacity: 1, y: 0, duration: 0.7, stagger: 0.05 }, 0.1);
+      // Tracking qui se resserre (subtil)
+      if (wordWrap) {
+        tl.to(
+          wordWrap,
+          { letterSpacing: "0.00em", duration: 0.55, ease: "power2.out" },
+          0.02
+        );
       }
 
-      tl.to(sub, { opacity: 1, y: 0, duration: 0.8 }, 0.35).to(
+      // -------- Stroke letters (desktop) : léger décalage, discret
+      if (isDesktop && strokeChars.length) {
+        tl.to(
+          strokeChars,
+          {
+            opacity: 1,
+            yPercent: 0,
+            rotateZ: 0,
+            duration: 0.26,
+            ease: "power3.out",
+            stagger: { each: 0.03, from: "start" },
+          },
+          0.10
+        );
+      }
+
+      // -------- Micro-settle (respiration premium)
+      tl.to(
+        chars,
+        {
+          yPercent: 0,
+          rotateZ: 0,
+          duration: 0.22,
+          ease: "power2.out",
+          stagger: { each: 0.02 },
+        },
+        "-=0.10"
+      );
+
+      if (isDesktop && strokeChars.length) {
+        tl.to(
+          strokeChars,
+          {
+            yPercent: 0,
+            rotateZ: 0,
+            duration: 0.18,
+            ease: "power2.out",
+            stagger: { each: 0.018 },
+          },
+          "-=0.14"
+        );
+      }
+
+      tl.to(sub, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 0.28).to(
         line,
-        { opacity: 1, scaleX: 1, duration: 0.8 },
-        0.5
+        { opacity: 1, scaleX: 1, duration: 0.65, ease: "power3.out" },
+        0.40
       );
 
       ScrollTrigger.create({
         trigger: pin,
         start: "top top",
-        end: "+=700",
-        scrub: 1,
+        end: "+=180%",
+        scrub: 0.9,
         pin: true,
         anticipatePin: 1,
         invalidateOnRefresh: true,
         animation: tl,
-        onEnter: () => {
-          setInitial();
-          tl.progress(0).pause(0);
-        },
-        onEnterBack: () => {
-          setInitial();
-          tl.progress(0).pause(0);
-        },
         // markers: true,
       });
     }, pinRef);
@@ -153,7 +202,7 @@ export default function AperturaFooter() {
         </div>
       </div>
 
-      {/* Contenu “footer de base” (ex- components/Footer.tsx) */}
+      {/* Contenu “footer de base” */}
       <div className="border-t border-ivoire/10">
         <div className="mx-auto w-full max-w-6xl px-4 py-10 md:px-8">
           <div className="text-sm text-ivoire/70">Menuiseries aluminium et PVC en Corse.</div>
