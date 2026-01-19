@@ -5,7 +5,6 @@ import "./globals.css";
 import { siteContent } from "@/lib/content";
 import LenisProvider from "@/components/LenisProvider";
 import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { SkipLink } from "@/components/SkipLink";
 import { JsonLd } from "@/components/JsonLd";
 import { localBusinessJsonLd, organizationJsonLd } from "@/lib/structuredData";
@@ -49,9 +48,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
           {/* Footer “APERTURA” global (toutes les pages) */}
           <AperturaFooter />
-
-          <Footer />
-
+          
           <JsonLd data={organizationJsonLd} />
           <JsonLd data={localBusinessJsonLd} />
         </LenisProvider>
