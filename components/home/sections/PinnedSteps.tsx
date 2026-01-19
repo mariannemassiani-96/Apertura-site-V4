@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import { ensureGsap, gsap } from "@/components/home/utils/gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useIsDesktop } from "@/components/home/hooks/useIsDesktop";
 import { usePrefersReducedMotion } from "@/components/home/hooks/usePrefersReducedMotion";
 
@@ -10,7 +11,6 @@ export default function PinnedSteps() {
   const isDesktop = useIsDesktop(1024);
   const reduced = usePrefersReducedMotion();
 
-  // 5–6 phrases courtes (tu peux ensuite les mettre dans content.ts si tu veux strict)
   const steps = useMemo(
     () => [
       { k: "01", t: "Ici, la lumière n’est jamais la même." },
@@ -29,14 +29,15 @@ export default function PinnedSteps() {
     if (!rootRef.current) return;
 
     ensureGsap();
+    gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
       const root = rootRef.current!;
       const items = gsap.utils.toArray<HTMLElement>("[data-step-item]");
 
-      // initial state
-      gsap.set(items, { opacity: 0, y: 10, filter: "blur(6px)" });
-      if (items[0]) gsap.set(items[0], { opacity: 1, y: 0, filter: "blur(0px)" });
+      // init
+      gsap.set(items, { opacity: 0, y: 10, scale: 1.01, willChange: "transform,opacity" });
+      if (items[0]) gsap.set(items[0], { opacity: 1, y: 0, scale: 1 });
 
       const tl = gsap.timeline({
         defaults: { ease: "none" },
@@ -44,7 +45,7 @@ export default function PinnedSteps() {
           trigger: root,
           start: "top top",
           end: () => `+=${steps.length * 320}`,
-          scrub: 0.8,
+          scrub: 0.85,
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
@@ -53,21 +54,12 @@ export default function PinnedSteps() {
 
       items.forEach((el, idx) => {
         const next = items[idx + 1];
-
-        // hold current a bit, then transition to next
         const at = idx * 1;
-        tl.to(
-          el,
-          { opacity: 0, y: -8, filter: "blur(8px)", duration: 0.35 },
-          at + 0.65
-        );
+
+        tl.to(el, { opacity: 0, y: -8, scale: 1.01, duration: 0.35 }, at + 0.65);
 
         if (next) {
-          tl.to(
-            next,
-            { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.45 },
-            at + 0.75
-          );
+          tl.to(next, { opacity: 1, y: 0, scale: 1, duration: 0.45 }, at + 0.75);
         }
       });
     }, rootRef);
@@ -89,26 +81,25 @@ export default function PinnedSteps() {
             </p>
           </div>
 
-          {/* Desktop pinned swaps, mobile stack */}
           <div className="relative">
             <div className="relative min-h-[46vh] rounded-2xl border border-ivoire/10 bg-black/20 p-6 md:p-8">
               <div className="absolute inset-0 rounded-2xl bg-[radial-gradient(ellipse_at_top,rgba(244,247,249,0.06),transparent_60%)]" />
+
               <div className="relative">
-                {steps.map((s) => (
-                  <div
-                    key={s.k}
-                    data-step-item
-                    className="absolute left-0 top-0 w-full lg:pr-6"
-                    aria-hidden="true"
-                  >
-                    <div className="flex items-start gap-4">
-                      <span className="text-xs tracking-[0.22em] text-cuivre">
-                        {s.k}
-                      </span>
-                      <p className="text-xl leading-snug md:text-2xl">{s.t}</p>
+                {/* Desktop pinned swaps */}
+                <div className="hidden lg:block">
+                  {steps.map((s) => (
+                    <div key={s.k} data-step-item className="absolute left-0 top-0 w-full lg:pr-6">
+                      <div className="flex items-start gap-4">
+                        <span className="text-xs tracking-[0.22em] text-cuivre">{s.k}</span>
+                        <p className="text-xl leading-snug md:text-2xl">{s.t}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+
+                  {/* Spacer for absolute items */}
+                  <div className="pointer-events-none invisible h-[46vh]" />
+                </div>
 
                 {/* Mobile readable fallback */}
                 <div className="space-y-6 lg:hidden">
@@ -119,9 +110,6 @@ export default function PinnedSteps() {
                     </div>
                   ))}
                 </div>
-
-                {/* Spacer for absolute items */}
-                <div className="pointer-events-none invisible h-[46vh] lg:block" />
               </div>
             </div>
 
