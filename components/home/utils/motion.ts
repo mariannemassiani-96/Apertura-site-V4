@@ -5,4 +5,4 @@ export const MOTION = {
   fadeDur: 0.75,
   yIn: 12,
   yInBig: 18,
-};
+} as const;
