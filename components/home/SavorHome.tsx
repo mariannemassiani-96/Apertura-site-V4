@@ -15,15 +15,10 @@ export default function SavorHome() {
       <HomeHero />
       <StoryScrollGsap />
 
-      {/* Savor callout (media plein écran + courbe + texte qui glisse) */}
-      <CalloutCurveMedia mediaType="image" imageSrc="/media/home/02.jpg" />
-
-      {/* Images flottantes (3) */}
+      <CalloutCurveMedia imageSrc="/media/home/02.jpg" />
       <FloatingMedia />
 
-      {/* Respiration galerie */}
       <HomeRail />
-
       <PinnedSteps />
       <ShrinkTransition />
       <AperturaOutro />
