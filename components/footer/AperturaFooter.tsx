@@ -37,15 +37,16 @@ export default function AperturaFooter() {
 
       const tl = gsap.timeline({
         scrollTrigger: {
-          trigger: root,
+          trigger: rootRef.current!,
           start: "top bottom",
           end: "+=420",
           scrub: 0.9,
-          pin: true, // ✅ respiration type savor
+          pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
-          // markers: true, // active 10s si besoin pour debug
+          // markers: true,
         },
+
       });
 
       tl.to(word, { opacity: 1, y: 0, letterSpacing: "-0.01em", duration: 1, ease: "power3.out" }, 0)
