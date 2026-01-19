@@ -50,7 +50,7 @@ export default function HomeHero() {
     // remplace "min-h-[100svh]" par "h-[100svh]" + ajoute "-mt-20"
     <section
       ref={rootRef as any}
-      className="relative min-h-[100svh] overflow-hidden bg-graphite"
+      className="relative -mt-20 h-[100svh] overflow-hidden bg-graphite"
     >
       <video
         ref={mediaRef}
