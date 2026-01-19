@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
+
 import { siteContent } from "@/lib/content";
 import LenisProvider from "@/components/LenisProvider";
 import { Header } from "@/components/Header";
-import { Footer } from "@/components/AperturaFooter";
+import { Footer } from "@/components/Footer";
 import { SkipLink } from "@/components/SkipLink";
 import { JsonLd } from "@/components/JsonLd";
 import { localBusinessJsonLd, organizationJsonLd } from "@/lib/structuredData";
+import AperturaFooter from "@/components/footer/AperturaFooter";
 
 export const metadata: Metadata = {
   title: siteContent.seo.defaultTitle,
@@ -33,38 +35,27 @@ export const viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="fr">
       <body>
         <SkipLink />
-        <LenisProvider />
-        <Header />
-        <main id="main" className="pt-20">
-          {children}
-        </main>
-              <body>
-        <SkipLink />
-        <LenisProvider />
-        <Header />
-        <main id="main" className="pt-20">
-          {children}
-        </main>
 
-        {/* ✅ APERTURA footer global (toutes les pages) */}
-        <AperturaFooter />
+        <LenisProvider>
+          <Header />
+          <main id="main" className="pt-20">
+            {children}
+          </main>
 
-        {/* Footer existant */}
-        <Footer />
+          {/* Footer “APERTURA” global (toutes les pages) */}
+          <AperturaFooter />
 
-        <JsonLd data={organizationJsonLd} />
-        <JsonLd data={localBusinessJsonLd} />
+          <Footer />
+
+          <JsonLd data={organizationJsonLd} />
+          <JsonLd data={localBusinessJsonLd} />
+        </LenisProvider>
       </body>
-       
     </html>
   );
 }
