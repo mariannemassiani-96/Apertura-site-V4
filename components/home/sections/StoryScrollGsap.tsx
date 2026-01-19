@@ -234,4 +234,24 @@ export default function StoryScrollGsap() {
                 <div className="h-[2px] w-24 overflow-hidden rounded bg-ivoire/15">
                   <div
                     className="h-full bg-ivoire/70"
-                    style={{ wid
+                    style={{ width: `${((activeIndex + 1) / count) * 100}%` }}
+                  />
+                </div>
+                <div className="text-[11px] tracking-[0.2em] text-ivoire/55">
+                  {String(activeIndex + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* A11y */}
+        <div className="sr-only">
+          {STORY.map((item) => (
+            <div key={`sr-${item.key}`}>{item.text}</div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
