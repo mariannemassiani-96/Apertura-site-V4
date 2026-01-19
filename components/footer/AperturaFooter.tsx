@@ -7,41 +7,57 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 export default function AperturaFooter() {
   const rootRef = useRef<HTMLElement | null>(null);
 
-  useEffect(() => {
-    if (!rootRef.current) return;
+ useEffect(() => {
+  if (reduced) return;
+  if (!rootRef.current) return;
 
-    // reduced motion safe (sans dépendre de ton hook)
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) return;
+  ensureGsap();
+  gsap.registerPlugin(ScrollTrigger);
 
-    ensureGsap();
-    gsap.registerPlugin(ScrollTrigger);
+  const ctx = gsap.context(() => {
+    // ✅ État initial forcé (sinon parfois tu “ne vois rien” bouger)
+    gsap.set("[data-ap-word]", { opacity: 0, y: 24, letterSpacing: "0.08em" });
+    gsap.set("[data-ap-sub]", { opacity: 0, y: 12 });
+    gsap.set("[data-ap-line]", { opacity: 0, scaleX: 0, transformOrigin: "50% 50%" });
+    gsap.set("[data-ap-stroke]", { opacity: 0 });
 
-    const ctx = gsap.context(() => {
-      // état initial (évite flash)
-      gsap.set("[data-ap-word]", { opacity: 0, y: 18, letterSpacing: "0.06em" });
-      gsap.set("[data-ap-sub]", { opacity: 0, y: 10 });
-      gsap.set("[data-ap-line]", { opacity: 0, scaleX: 0, transformOrigin: "50% 50%" });
-      gsap.set("[data-ap-stroke]", { opacity: 0 });
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: rootRef.current!,
+        start: "top bottom",
+        end: "+=420",
+        scrub: 0.9,
+        pin: true,              // ✅ pause visuelle façon savor
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+        // markers: true,        // 🔥 DEBUG (à activer 30s si besoin)
+      },
+    });
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: rootRef.current!,
-          start: "top 85%",
-          end: "top 40%",
-          scrub: 0.9,
-          invalidateOnRefresh: true,
-        },
-      });
+    tl.to(
+      "[data-ap-word]",
+      { opacity: 1, y: 0, letterSpacing: "-0.01em", duration: 1, ease: "power3.out" },
+      0
+    )
+      .to(
+        "[data-ap-sub]",
+        { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" },
+        0.25
+      )
+      .to(
+        "[data-ap-line]",
+        { opacity: 1, scaleX: 1, duration: 0.8, ease: "power3.out" },
+        0.4
+      );
 
-      tl.to("[data-ap-word]", { opacity: 1, y: 0, letterSpacing: "-0.01em", duration: 1, ease: "none" }, 0)
-        .to("[data-ap-stroke]", { opacity: 0.28, duration: 0.7, ease: "none" }, 0.15)
-        .to("[data-ap-sub]", { opacity: 1, y: 0, duration: 0.8, ease: "none" }, 0.25)
-        .to("[data-ap-line]", { opacity: 1, scaleX: 1, duration: 0.8, ease: "none" }, 0.45);
-    }, rootRef);
+    if (isDesktop) {
+      tl.to("[data-ap-stroke]", { opacity: 0.28, duration: 0.9, ease: "power2.out" }, 0.15);
+    }
+  }, rootRef);
 
-    return () => ctx.revert();
-  }, []);
+  return () => ctx.revert();
+}, [reduced, isDesktop]);
+
 
   return (
     <section ref={rootRef as any} className="relative w-full bg-graphite-soft">
