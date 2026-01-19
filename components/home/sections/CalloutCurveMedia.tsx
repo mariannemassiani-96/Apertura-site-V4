@@ -9,15 +9,13 @@ import { usePrefersReducedMotion } from "@/components/home/hooks/usePrefersReduc
 import { MOTION } from "@/components/home/utils/motion";
 
 type Props = {
-  mediaType?: "image" | "video";
   imageSrc?: string;
-  videoSrc?: string;
+  imageAlt?: string;
 };
 
 export default function CalloutCurveMedia({
-  mediaType = "image",
   imageSrc = "/media/home/02.jpg",
-  videoSrc = "/media/home/hero.mp4",
+  imageAlt = "",
 }: Props) {
   const rootRef = useRef<HTMLElement | null>(null);
   const isDesktop = useIsDesktop(1024);
@@ -40,6 +38,7 @@ export default function CalloutCurveMedia({
       if (!path || !label || !copy) return;
 
       const length = path.getTotalLength();
+
       gsap.set(path, {
         strokeDasharray: length,
         strokeDashoffset: length,
@@ -63,22 +62,18 @@ export default function CalloutCurveMedia({
         },
       });
 
-      // Dessin de la courbe
+      // Courbe qui se “dessine”
       tl.to(path, { strokeDashoffset: 0, ease: "none" }, 0);
 
       // Label qui glisse (feel savor)
       tl.to(label, { x: 70, opacity: 1, ease: "none" }, 0.05);
 
-      // Copy à droite qui “arrive” et bouge légèrement (sans gadget)
+      // Copy à droite qui arrive
       tl.to(copy, { opacity: 1, x: 0, y: 0, duration: 0.25, ease: "none" }, 0.22);
       if (copy2) tl.to(copy2, { opacity: 1, x: 0, y: 0, duration: 0.25, ease: "none" }, 0.32);
 
-      // Micro mouvement global (ultra discret)
-      tl.to(
-        "[data-curve-float]",
-        { y: -8, ease: "none" },
-        0
-      );
+      // micro “drift” global (ultra discret)
+      tl.to("[data-curve-float]", { y: -8, ease: "none" }, 0);
     }, rootRef);
 
     return () => ctx.revert();
@@ -88,26 +83,14 @@ export default function CalloutCurveMedia({
     <section ref={rootRef as any} className="relative bg-graphite">
       {/* MEDIA plein écran */}
       <div className="absolute inset-0">
-        {mediaType === "video" ? (
-          <video
-            className="h-full w-full object-cover"
-            src={videoSrc}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-          />
-        ) : (
-          <Image
-            src={imageSrc}
-            alt=""
-            fill
-            priority={false}
-            sizes="100vw"
-            className="object-cover"
-          />
-        )}
+        <Image
+          src={imageSrc}
+          alt={imageAlt}
+          fill
+          sizes="100vw"
+          className="object-cover"
+          priority={false}
+        />
 
         {/* traitement savor-like (sobre) */}
         <div className="absolute inset-0 bg-black/45 md:bg-black/35" />
@@ -118,7 +101,7 @@ export default function CalloutCurveMedia({
       {/* CONTENU */}
       <div className="relative mx-auto min-h-[92svh] max-w-6xl px-4 py-20 md:px-8 lg:py-28">
         <div data-curve-float className="relative">
-          {/* Label “from — to” (tu gardes tes textes, ici c’est un exemple) */}
+          {/* Label type savor (tu peux remplacer par tes textes exacts) */}
           <div
             data-curve-label
             className="relative z-10 mx-auto flex max-w-3xl items-center gap-6 text-sm text-ivoire/85"
@@ -149,11 +132,12 @@ export default function CalloutCurveMedia({
             {/* Copy à droite (mets tes textes existants) */}
             <div className="pointer-events-none absolute bottom-12 right-0 max-w-sm text-left">
               <div data-curve-copy className="text-ivoire/92 text-[18px] leading-[1.3] md:text-[22px]">
-                {/* texte existant */}
+                {/* Remplace par ton texte existant */}
                 Nous fabriquons des ouvertures pensées pour laisser entrer la lumière.
               </div>
+
               <div data-curve-copy-2 className="mt-3 text-ivoire/70 text-[14px] leading-relaxed md:text-[16px]">
-                {/* texte existant si besoin, sinon supprime data-curve-copy-2 */}
+                {/* Optionnel : supprime ce bloc si tu ne veux qu’une seule phrase */}
                 Sans effets inutiles. Juste le rythme.
               </div>
             </div>
