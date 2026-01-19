@@ -25,10 +25,12 @@ export default function FloatingMedia() {
       const a = root.querySelector<HTMLElement>("[data-float-a]");
       const b = root.querySelector<HTMLElement>("[data-float-b]");
       const c = root.querySelector<HTMLElement>("[data-float-c]");
+      const title = root.querySelector<HTMLElement>("[data-float-title]");
 
       if (!a || !b || !c) return;
 
       gsap.set([a, b, c], { willChange: "transform" });
+      if (title) gsap.set(title, { opacity: 0, y: MOTION.yIn, willChange: "transform,opacity" });
 
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -42,6 +44,9 @@ export default function FloatingMedia() {
         },
       });
 
+      if (title) tl.to(title, { opacity: 1, y: 0, duration: 0.25, ease: "none" }, 0.1);
+
+      // Trajectoires sobres (savor moderne)
       tl.fromTo(a, { xPercent: -10, yPercent: 8, scale: 1.02 }, { xPercent: 6, yPercent: -4, scale: 1, ease: "none" }, 0);
       tl.fromTo(b, { xPercent: 10, yPercent: -6, scale: 1.03 }, { xPercent: -6, yPercent: 5, scale: 1, ease: "none" }, 0);
       tl.fromTo(c, { xPercent: -6, yPercent: -10, scale: 1.02 }, { xPercent: 10, yPercent: 6, scale: 1, ease: "none" }, 0.02);
@@ -53,8 +58,16 @@ export default function FloatingMedia() {
   return (
     <section ref={rootRef as any} className="relative bg-graphite">
       <div className="mx-auto min-h-[92svh] max-w-6xl px-4 py-20 md:px-8 lg:py-28">
+        <div className="mb-10 max-w-xl">
+          <p className="text-xs tracking-[0.22em] text-ivoire/60">IMAGES</p>
+          <h2 data-float-title className="mt-4 text-2xl font-medium leading-tight md:text-4xl">
+            Une matière qui bouge. Une lumière qui glisse.
+          </h2>
+        </div>
+
         <div className="relative h-[70svh] overflow-hidden rounded-3xl border border-ivoire/10 bg-black/20">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(244,247,249,0.06),transparent_60%)]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-black/0 to-transparent" />
 
           <div data-float-a className="absolute left-[6%] top-[10%] h-[42%] w-[34%] overflow-hidden rounded-2xl border border-ivoire/10">
             <Image src="/media/home/rail/01.jpg" alt="Apertura" fill className="object-cover" sizes="40vw" />
