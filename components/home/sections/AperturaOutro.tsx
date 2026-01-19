@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { ensureGsap, gsap } from "@/components/home/utils/gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useIsDesktop } from "@/components/home/hooks/useIsDesktop";
 import { usePrefersReducedMotion } from "@/components/home/hooks/usePrefersReducedMotion";
 
@@ -17,54 +18,38 @@ export default function AperturaOutro() {
     if (!rootRef.current || !wordRef.current) return;
 
     ensureGsap();
+    gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
       const root = rootRef.current!;
       const word = wordRef.current!;
 
-      // Entrée douce + “respiration”
+      gsap.set(word, { opacity: 0, y: 18, letterSpacing: "0.02em", willChange: "transform,opacity" });
+      gsap.set("[data-apertura-sub]", { opacity: 0, y: 10, willChange: "transform,opacity" });
+      gsap.set("[data-apertura-line]", { scaleX: 0, opacity: 0, transformOrigin: "50% 50%", willChange: "transform,opacity" });
+      if (isDesktop) gsap.set("[data-apertura-stroke]", { opacity: 0, willChange: "opacity" });
+
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: root,
-          start: "top 85%",
-          end: "top 25%",
-          scrub: 0.8,
+          start: "top 80%",
+          end: "top 30%",
+          scrub: 0.85,
           invalidateOnRefresh: true,
         },
       });
 
-      // Mot : safe (opacity + translate + légère “ouverture” tracking)
-      tl.fromTo(
-        word,
-        { opacity: 0, y: 18, letterSpacing: "0.02em" },
-        { opacity: 1, y: 0, letterSpacing: "-0.01em", duration: 1, ease: "none" },
-        0
-      );
+      // Mot (prépare le footer, sans le “voler”)
+      tl.to(word, { opacity: 1, y: 0, letterSpacing: "-0.01em", duration: 1, ease: "none" }, 0);
 
-      // Stroke desktop léger
+      // Stroke discret desktop
       if (isDesktop) {
-        tl.fromTo(
-          "[data-apertura-stroke]",
-          { opacity: 0 },
-          { opacity: 0.28, duration: 0.6, ease: "none" },
-          0.25
-        );
+        tl.to("[data-apertura-stroke]", { opacity: 0.28, duration: 0.6, ease: "none" }, 0.22);
       }
 
-      // Sous-texte + trait
-      tl.fromTo(
-        "[data-apertura-sub]",
-        { opacity: 0, y: 10 },
-        { opacity: 1, y: 0, duration: 0.7, ease: "none" },
-        0.35
-      );
-
-      tl.fromTo(
-        "[data-apertura-line]",
-        { scaleX: 0, opacity: 0, transformOrigin: "50% 50%" },
-        { scaleX: 1, opacity: 1, duration: 0.7, ease: "none" },
-        0.5
-      );
+      // Sous-texte + ligne
+      tl.to("[data-apertura-sub]", { opacity: 1, y: 0, duration: 0.7, ease: "none" }, 0.32);
+      tl.to("[data-apertura-line]", { scaleX: 1, opacity: 1, duration: 0.7, ease: "none" }, 0.46);
     }, rootRef);
 
     return () => ctx.revert();
@@ -75,18 +60,11 @@ export default function AperturaOutro() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(194,122,74,0.10),transparent_60%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.14),transparent_58%)]" />
 
-      <div className="relative mx-auto flex min-h-[100svh] max-w-6xl items-center justify-center px-4 py-24 md:px-8">
+      <div className="relative mx-auto flex min-h-[92svh] max-w-6xl items-center justify-center px-4 py-24 md:px-8">
         <div className="relative w-full">
-          <div
-            ref={wordRef}
-            className="relative mx-auto select-none overflow-visible px-3 text-center md:px-6"
-          >
+          <div ref={wordRef} className="relative mx-auto select-none overflow-visible px-3 text-center md:px-6">
             {/* Stroke (desktop) */}
-            <div
-              data-apertura-stroke
-              className="pointer-events-none absolute inset-0 hidden select-none lg:block"
-              aria-hidden="true"
-            >
+            <div data-apertura-stroke className="pointer-events-none absolute inset-0 hidden select-none lg:block" aria-hidden="true">
               <span
                 className="block text-[14vw] font-semibold leading-none tracking-tight text-transparent"
                 style={{ WebkitTextStroke: "1px rgba(244,247,249,0.30)" }}
