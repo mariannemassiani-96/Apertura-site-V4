@@ -2,10 +2,9 @@
 
 import Image from "next/image";
 import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
-import gsap from "gsap";
+import { ensureGsap, gsap } from "@/components/home/utils/gsap";
+import { usePrefersReducedMotion } from "@/components/home/hooks/usePrefersReducedMotion";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
 
 type StoryItem = {
   key: string;
@@ -15,7 +14,14 @@ type StoryItem = {
 };
 
 const STORY: StoryItem[] = [
-  { key: "s1", text: <>DES OUVERTURES QUI FONT DU BIEN</>, mediaSrc: "/home/story/01.jpg", mediaAlt: "Collectif, lumière, chaleur" },
+  // 1
+  {
+    key: "s1",
+    text: <>DES OUVERTURES QUI FONT DU BIEN</>,
+    mediaSrc: "/home/story/01.jpg",
+    mediaAlt: "Collectif, lumière, chaleur",
+  },
+  // 2
   {
     key: "s2",
     text: (
@@ -27,6 +33,7 @@ const STORY: StoryItem[] = [
     mediaSrc: "/home/story/02.jpg",
     mediaAlt: "Matière brute et lumière",
   },
+  // 3
   {
     key: "s3",
     text: (
@@ -39,6 +46,7 @@ const STORY: StoryItem[] = [
     mediaSrc: "/home/story/03.jpg",
     mediaAlt: "Vie quotidienne collective",
   },
+  // 4
   {
     key: "s4",
     text: (
@@ -51,6 +59,7 @@ const STORY: StoryItem[] = [
     mediaSrc: "/home/story/04.jpg",
     mediaAlt: "Contre-rythme, presque vide",
   },
+  // 5
   {
     key: "s5",
     text: (
@@ -63,6 +72,7 @@ const STORY: StoryItem[] = [
     mediaSrc: "/home/story/05.jpg",
     mediaAlt: "Nature, sol, origine",
   },
+  // 6A (petite échelle)
   {
     key: "s6a",
     text: (
@@ -75,6 +85,7 @@ const STORY: StoryItem[] = [
     mediaSrc: "/home/story/06a.jpg",
     mediaAlt: "Petite échelle",
   },
+  // 6B (grande échelle)
   {
     key: "s6b",
     text: (
@@ -87,6 +98,7 @@ const STORY: StoryItem[] = [
     mediaSrc: "/home/story/06b.jpg",
     mediaAlt: "Grande échelle",
   },
+  // 7
   {
     key: "s7",
     text: (
@@ -99,6 +111,7 @@ const STORY: StoryItem[] = [
     mediaSrc: "/home/story/07.jpg",
     mediaAlt: "Climat vécu",
   },
+  // 8
   {
     key: "s8",
     text: (
@@ -111,91 +124,97 @@ const STORY: StoryItem[] = [
     mediaSrc: "/home/story/08.jpg",
     mediaAlt: "Sensorialité, main, matière",
   },
-  { key: "s9", text: <>L’avenir s’ouvre ici</>, mediaSrc: "/home/story/09.jpg", mediaAlt: "Ouverture finale, horizon" },
+  // 9
+  {
+    key: "s9",
+    text: <>L’avenir s’ouvre ici</>,
+    mediaSrc: "/home/story/09.jpg",
+    mediaAlt: "Ouverture finale, horizon",
+  },
 ];
+
+const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
 
 export default function StoryScrollGsap() {
   const wrapRef = useRef<HTMLElement | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const reduced = usePrefersReducedMotion();
 
   const count = STORY.length;
   const totalHeight = useMemo(() => `${count * 100}svh`, [count]);
 
   useLayoutEffect(() => {
+    if (reduced) return;
     if (!wrapRef.current || !viewportRef.current) return;
 
+    ensureGsap();
+    gsap.registerPlugin(ScrollTrigger);
+
     const ctx = gsap.context(() => {
-      const wrap = wrapRef.current!;
       const viewport = viewportRef.current!;
       const layers = Array.from(viewport.querySelectorAll<HTMLElement>("[data-layer]"));
-      const text = viewport.querySelector<HTMLElement>("[data-text]");
+      const textEl = viewport.querySelector<HTMLElement>("[data-text]");
 
-      // Init visuel : seule la 1ere image visible
+      let current = 0;
+
+      // Init: première image visible
       layers.forEach((el, i) => {
-        gsap.set(el, { opacity: i === 0 ? 1 : 0, scale: i === 0 ? 1 : 1.02 });
+        gsap.set(el, {
+          opacity: i === 0 ? 1 : 0,
+          scale: i === 0 ? 1 : 1.02,
+          willChange: "transform,opacity",
+        });
       });
-      if (text) gsap.set(text, { opacity: 1, y: 0 });
+      if (textEl) gsap.set(textEl, { opacity: 1, y: 0 });
 
-      // Driver "steps" : 1 écran = 1 index
-      ScrollTrigger.create({
-        trigger: wrap,
+      const st = ScrollTrigger.create({
+        trigger: wrapRef.current!,
         start: "top top",
         end: "bottom bottom",
-        scrub: false,
+        // pas de scrub (on “step”)
         onUpdate: (self) => {
-          const idx = Math.min(count - 1, Math.max(0, Math.floor(self.progress * count)));
-          setActiveIndex(idx);
+          // progress ∈ [0..1], on convertit en index
+          const next = clamp(Math.floor(self.progress * count), 0, count - 1);
+          if (next === current) return;
+
+          current = next;
+          setActiveIndex(next);
+
+          // Crossfade + micro-scale
+          layers.forEach((layer) => {
+            const isActive = Number(layer.dataset.index) === next;
+            gsap.to(layer, {
+              opacity: isActive ? 1 : 0,
+              scale: isActive ? 1 : 1.02,
+              duration: 0.9,
+              ease: "power3.out",
+              overwrite: true,
+            });
+          });
+
+          // Texte: entrée douce, pas de blur (iOS friendly)
+          if (textEl) {
+            gsap.fromTo(
+              textEl,
+              { opacity: 0, y: 10 },
+              { opacity: 1, y: 0, duration: 0.45, ease: "power3.out", overwrite: true }
+            );
+          }
         },
       });
 
-      // Transitions sur changement d’index (via un trigger par step)
-      // On crée une timeline par step pour “respirer” (pas de parallax continu)
-      STORY.forEach((_, i) => {
-        ScrollTrigger.create({
-          trigger: wrap,
-          start: () => `top top-=${i * window.innerHeight}`,
-          end: () => `top top-=${(i + 1) * window.innerHeight}`,
-          onEnter: () => playTo(i),
-          onEnterBack: () => playTo(i),
-        });
-      });
-
-      function playTo(next: number) {
-        const current = layers.findIndex((el) => Number(el.dataset.index) === next);
-
-        // on anime tout : active = 1, les autres = 0
-        layers.forEach((layer) => {
-          const isActive = Number(layer.dataset.index) === next;
-
-          gsap.to(layer, {
-            opacity: isActive ? 1 : 0,
-            scale: isActive ? 1 : 1.02,
-            duration: 0.9,
-            ease: "power3.out",
-            overwrite: true,
-          });
-        });
-
-        if (text) {
-          gsap.fromTo(
-            text,
-            { opacity: 0, y: 10 },
-            { opacity: 1, y: 0, duration: 0.45, ease: "power3.out", overwrite: true }
-          );
-        }
-
-        setActiveIndex(next);
-      }
+      return () => st.kill();
     }, wrapRef);
 
     return () => ctx.revert();
-  }, [count]);
+  }, [count, reduced]);
 
   const active = STORY[activeIndex];
 
   return (
     <section ref={wrapRef} className="relative w-full" style={{ height: totalHeight }}>
+      {/* viewport sticky */}
       <div ref={viewportRef} className="sticky top-0 h-[100svh] w-full overflow-hidden">
         {/* MEDIA stack */}
         <div className="absolute inset-0">
@@ -204,7 +223,7 @@ export default function StoryScrollGsap() {
               key={item.key}
               data-layer
               data-index={idx}
-              className="absolute inset-0 will-change-transform"
+              className="absolute inset-0"
             >
               <Image
                 src={item.mediaSrc}
@@ -214,12 +233,13 @@ export default function StoryScrollGsap() {
                 sizes="100vw"
                 className="object-cover"
               />
+              {/* voile ultra léger */}
               <div className="pointer-events-none absolute inset-0 bg-black/10" />
             </div>
           ))}
         </div>
 
-        {/* TEXTE (discret) */}
+        {/* TEXTE overlay discret */}
         <div className="pointer-events-none absolute inset-0 flex items-end">
           <div className="w-full bg-gradient-to-t from-black/65 via-black/10 to-transparent">
             <div className="mx-auto w-full max-w-6xl px-5 pb-10 md:px-10 md:pb-14">
@@ -245,7 +265,7 @@ export default function StoryScrollGsap() {
           </div>
         </div>
 
-        {/* A11y */}
+        {/* Accessibilité */}
         <div className="sr-only">
           {STORY.map((item) => (
             <div key={`sr-${item.key}`}>{item.text}</div>
