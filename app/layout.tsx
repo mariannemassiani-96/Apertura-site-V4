@@ -4,7 +4,7 @@ import "./globals.css";
 import { siteContent } from "@/lib/content";
 import LenisProvider from "@/components/LenisProvider";
 import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
+import { Footer } from "@/components/AperturaFooter";
 import { SkipLink } from "@/components/SkipLink";
 import { JsonLd } from "@/components/JsonLd";
 import { localBusinessJsonLd, organizationJsonLd } from "@/lib/structuredData";
@@ -47,10 +47,24 @@ export default function RootLayout({
         <main id="main" className="pt-20">
           {children}
         </main>
+              <body>
+        <SkipLink />
+        <LenisProvider />
+        <Header />
+        <main id="main" className="pt-20">
+          {children}
+        </main>
+
+        {/* ✅ APERTURA footer global (toutes les pages) */}
+        <AperturaFooter />
+
+        {/* Footer existant */}
         <Footer />
+
         <JsonLd data={organizationJsonLd} />
         <JsonLd data={localBusinessJsonLd} />
       </body>
+       
     </html>
   );
 }
