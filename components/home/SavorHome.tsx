@@ -4,7 +4,7 @@ import HomeHero from "@/components/home/sections/HomeHero";
 import StoryCalloutCurve from "@/components/home/sections/StoryCalloutCurve";
 import HomeRail from "@/components/home/sections/HomeRail";
 import ShrinkTransition from "@/components/home/sections/ShrinkTransition";
-import AperturaOutro from "@/components/home/sections/AperturaOutro";
+
 
 export default function SavorHome() {
   return (
@@ -13,7 +13,7 @@ export default function SavorHome() {
       <StoryCalloutCurve />
       <HomeRail />
       <ShrinkTransition />
-      <AperturaOutro />
+
     </div>
   );
 }
