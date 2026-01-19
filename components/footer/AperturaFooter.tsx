@@ -22,11 +22,10 @@ export default function AperturaFooter() {
     const ctx = gsap.context(() => {
       const root = rootRef.current!;
 
-      const q = (sel: string) => root.querySelector(sel) as HTMLElement | null;
-      const word = q("[data-ap-word]");
-      const sub = q("[data-ap-sub]");
-      const line = q("[data-ap-line]");
-      const stroke = q("[data-ap-stroke]");
+      const word = root.querySelector<HTMLElement>("[data-ap-word]");
+      const sub = root.querySelector<HTMLElement>("[data-ap-sub]");
+      const line = root.querySelector<HTMLElement>("[data-ap-line]");
+      const stroke = root.querySelector<HTMLElement>("[data-ap-stroke]");
 
       if (!word || !sub || !line) return;
 
@@ -42,10 +41,10 @@ export default function AperturaFooter() {
           start: "top bottom",
           end: "+=420",
           scrub: 0.9,
-          pin: true, // ✅ “respiration” façon savor
+          pin: true, // ✅ respiration type savor
           anticipatePin: 1,
           invalidateOnRefresh: true,
-          // markers: true, // 🔥 active 20s si tu veux vérifier que ça trigger
+          // markers: true, // active 10s si besoin pour debug
         },
       });
 
@@ -93,10 +92,7 @@ export default function AperturaFooter() {
               </span>
             </div>
 
-            <p
-              data-ap-sub
-              className="mx-auto mt-8 max-w-xl text-sm leading-relaxed text-ivoire/70 md:text-base"
-            >
+            <p data-ap-sub className="mx-auto mt-8 max-w-xl text-sm leading-relaxed text-ivoire/70 md:text-base">
               Depuis toujours, ouvrir est un art.
             </p>
 
@@ -107,4 +103,3 @@ export default function AperturaFooter() {
     </section>
   );
 }
-
