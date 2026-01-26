@@ -13,3 +13,15 @@ node_modules
 
 # OS
 .DS_Store
+
+
+# local env / backups
+.env.local
+.env.local.bak
+.env
+.env.*
+
+# next / build artifacts
+.next
+next
+apertura-site-v4@0.1.0
