@@ -13,7 +13,7 @@ node_modules
 
 # OS
 .DS_Store
-cat >> .gitignore <<'EOF'
+
 
 # local env / backups
 .env.local
@@ -25,4 +25,3 @@ cat >> .gitignore <<'EOF'
 .next
 next
 apertura-site-v4@0.1.0
-EOF
