@@ -1,9 +1,3 @@
-console.log("[odoo-introspect] start", new Date().toISOString());
-console.log("[odoo-introspect] ODOO_URL =", process.env.ODOO_URL);
-console.log("[odoo-introspect] ODOO_DB =", process.env.ODOO_DB);
-console.log("[odoo-introspect] ODOO_USERNAME =", process.env.ODOO_USERNAME);
-console.log("[odoo-introspect] has password =", Boolean(process.env.ODOO_PASSWORD));
-
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 
@@ -60,7 +54,6 @@ async function odooCall<T>(params: any): Promise<T> {
   }
 }
 
-
 async function login(): Promise<number> {
   const uid = await odooCall<number>({
     service: "common",
@@ -71,7 +64,13 @@ async function login(): Promise<number> {
   return uid;
 }
 
-async function executeKw<T>(uid: number, model: string, method: string, args: any[], kwargs: any = {}): Promise<T> {
+async function executeKw<T>(
+  uid: number,
+  model: string,
+  method: string,
+  args: any[],
+  kwargs: any = {}
+): Promise<T> {
   return odooCall<T>({
     service: "object",
     method: "execute_kw",
@@ -80,13 +79,36 @@ async function executeKw<T>(uid: number, model: string, method: string, args: an
 }
 
 export async function GET() {
+  // ✅ Never allow this endpoint in production
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ ok: false, error: "Not found" }, { status: 404 });
+  }
+
+  // Logs utiles (DEV uniquement)
+  console.log("[odoo-introspect] start", new Date().toISOString());
+  console.log("[odoo-introspect] ODOO_URL =", process.env.ODOO_URL);
+  console.log("[odoo-introspect] ODOO_DB =", process.env.ODOO_DB);
+  console.log("[odoo-introspect] ODOO_USERNAME =", process.env.ODOO_USERNAME);
+  console.log("[odoo-introspect] has password =", Boolean(process.env.ODOO_PASSWORD));
+
   try {
     const uid = await login();
 
     // 1) Find companies by name
     const findCompany = async (name: string) => {
-      const ids = await executeKw<number[]>(uid, "res.company", "search", [[["name", "=", name]]], { limit: 5 });
-      const recs = await executeKw<any[]>(uid, "res.company", "read", [ids, ["id", "name"]]);
+      const ids = await executeKw<number[]>(
+        uid,
+        "res.company",
+        "search",
+        [[["name", "=", name]]],
+        { limit: 5 }
+      );
+      const recs = await executeKw<any[]>(
+        uid,
+        "res.company",
+        "read",
+        [ids, ["id", "name"]]
+      );
       return recs;
     };
 
@@ -105,7 +127,8 @@ export async function GET() {
     // Optionnel: réduire pour ne pas renvoyer 3000 lignes
     const interesting = Object.fromEntries(
       Object.entries(fields).filter(([k]) =>
-        k.startsWith("x_") || ["state", "company_id", "partner_id", "write_date", "date_order"].includes(k)
+        k.startsWith("x_") ||
+        ["state", "company_id", "partner_id", "write_date", "date_order"].includes(k)
       )
     );
 
@@ -119,6 +142,9 @@ export async function GET() {
       ],
     });
   } catch (e: any) {
-    return NextResponse.json({ ok: false, error: e?.message ?? "error" }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, error: e?.message ?? "error" },
+      { status: 500 }
+    );
   }
 }
