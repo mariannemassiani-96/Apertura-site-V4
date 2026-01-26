@@ -1,25 +1,36 @@
 import { NextResponse } from "next/server";
 import { getProSessionFromRequest } from "./session";
 import { PermissionKey, assertCan } from "./permissions";
+import { ProUserSession } from "./types";
 
-export function requireProSession() {
+type RequireProSessionResult =
+  | { session: ProUserSession; response?: undefined }
+  | { session: null; response: NextResponse };
+
+export function requireProSession(): RequireProSessionResult {
   const session = getProSessionFromRequest();
+
   if (!session) {
     return {
       session: null,
       response: NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 }),
     };
   }
-  return { session, response: null as NextResponse | null };
+
+  return { session };
 }
 
-export function requirePermission(permission: PermissionKey) {
-  const { session, response } = requireProSession();
-  if (!session) return { session: null, response };
+type RequirePermissionResult =
+  | { session: ProUserSession; response?: undefined }
+  | { session: null; response: NextResponse };
+
+export function requirePermission(permission: PermissionKey): RequirePermissionResult {
+  const result = requireProSession();
+  if (result.response) return result;
 
   try {
-    assertCan(session, permission);
-    return { session, response: null as NextResponse | null };
+    assertCan(result.session, permission);
+    return { session: result.session };
   } catch {
     return {
       session: null,
