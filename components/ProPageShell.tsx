@@ -1,9 +1,7 @@
 import { ReactNode } from "react";
-import { AuthGuard } from "@/components/AuthGuard";
 import { ProLayout } from "@/components/ProLayout";
 
+// ✅ On enlève AuthGuard : c’est app/pro/layout.tsx qui protège
 export const ProPageShell = ({ children }: { children: ReactNode }) => (
-  <AuthGuard>
-    <ProLayout>{children}</ProLayout>
-  </AuthGuard>
+  <ProLayout>{children}</ProLayout>
 );

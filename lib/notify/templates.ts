@@ -3,7 +3,23 @@ export type NotifyEvent =
   | "ORDER_SIGNED"
   | "DEPOSIT_REQUIRED"
   | "DEPOSIT_RECEIVED"
-  | "DELIVERY_CONFIRMED";
+  | "DELIVERY_CONFIRMED"
+  | "USER_INVITE";
+
+/**
+ * Helper optionnel (tu peux le garder, mais le flux standard passe par renderEmail)
+ */
+export function inviteUserEmail(params: { toName: string; link: string }) {
+  return {
+    subject: "Invitation Portail PRO Apertura",
+    html: `
+      <p>Bonjour ${params.toName || ""},</p>
+      <p>Vous avez été invité(e) à accéder au Portail PRO Apertura.</p>
+      <p><a href="${params.link}">Définir mon mot de passe</a></p>
+      <p>Ce lien est valable 24h.</p>
+    `,
+  };
+}
 
 export function renderEmail(event: NotifyEvent, ctx: Record<string, any>) {
   const brand = "Apertura di Corsica";
@@ -44,6 +60,30 @@ export function renderEmail(event: NotifyEvent, ctx: Record<string, any>) {
         subject: `[${brand}] Livraison confirmée – ${orderName}`,
         html: `<p>La livraison de <b>${orderName}</b> est confirmée.</p>
 <p><a href="${portalUrl}">Accéder au portail</a></p>`,
+      };
+
+    case "USER_INVITE": {
+      // MVP: infos d’invitation
+      const toName = String(ctx.toName ?? "").trim();
+      const inviteLink = String(ctx.inviteLink ?? ctx.link ?? "").trim(); // tolérant si tu passes link
+      const companyName = String(ctx.companyName ?? "").trim();
+
+      return {
+        subject: `[${brand}] Invitation Portail PRO`,
+        html: `
+<p>Bonjour ${toName || ""},</p>
+<p>Vous avez été invité(e) à accéder au <b>Portail PRO Apertura</b>${companyName ? ` pour <b>${companyName}</b>` : ""}.</p>
+<p><a href="${inviteLink}">Définir mon mot de passe</a></p>
+<p>Ce lien est valable 24h.</p>
+        `,
+      };
+    }
+
+    default:
+      // Sécurité runtime si jamais un event inconnu arrive
+      return {
+        subject: `[${brand}] Notification`,
+        html: `<p>Notification</p><p><a href="${portalUrl}">Accéder au portail</a></p>`,
       };
   }
 }

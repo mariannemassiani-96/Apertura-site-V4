@@ -1,18 +1,14 @@
-import { siteContent } from "@/lib/content";
-import { buildMetadata } from "@/lib/seo";
-import { ProPageShell } from "@/components/ProPageShell";
-import { DashboardClient } from "@/app/pro/dashboard/DashboardClient";
-
-export const metadata = buildMetadata({
-  title: siteContent.pageMeta.pro.dashboard.title,
-  description: siteContent.pageMeta.pro.dashboard.description,
-  path: "/pro/dashboard",
-});
+import DashboardClient from "./DashboardClient";
 
 export default function ProDashboardPage() {
   return (
-    <ProPageShell>
+    <main style={{ maxWidth: 1100, margin: "32px auto", padding: 16 }}>
+      <h1>Dashboard PRO</h1>
+      <p style={{ opacity: 0.8, marginTop: 4 }}>
+        Vue rapide sur l’activité, les actions et les statuts.
+      </p>
+
       <DashboardClient />
-    </ProPageShell>
+    </main>
   );
 }

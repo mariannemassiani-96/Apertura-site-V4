@@ -20,3 +20,27 @@ export async function dispatchEmail(params: {
     htmlContent: html,
   });
 }
+
+/**
+ * Helper métier (MVP) — invitation utilisateur
+ * Utilisation:
+ *   await dispatchUserInviteEmail({
+ *     toEmail, toName, inviteLink
+ *   })
+ */
+export async function dispatchUserInviteEmail(params: {
+  toEmail: string;
+  toName?: string;
+  inviteLink: string;
+  companyName?: string;
+}) {
+  return dispatchEmail({
+    event: "USER_INVITE",
+    to: [{ email: params.toEmail, name: params.toName }],
+    ctx: {
+      toName: params.toName ?? "",
+      inviteLink: params.inviteLink,
+      companyName: params.companyName ?? "",
+    },
+  });
+}
